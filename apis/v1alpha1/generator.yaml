@@ -1,0 +1,7 @@
+sdk_names:
+  model_name: auto-scaling
+
+ignore:
+  resource_names:
+      - AutoScalingGroup
+      - LaunchConfiguration

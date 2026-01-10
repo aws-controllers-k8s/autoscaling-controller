@@ -1,0 +1,40 @@
+# This configuration is a placeholder. Replace any values with relevant values for your
+# service controller project.
+---
+annotations:
+  capabilityLevel: Basic Install
+  shortDescription: AWS Auto Scaling controller is a service controller for managing EC2 Auto Scaling resources
+    in Kubernetes
+displayName: AWS Controllers for Kubernetes - Amazon EC2 Auto Scaling
+description: |-
+  Manage Amazon EC2 Auto Scaling resources in AWS from within your Kubernetes cluster.
+
+
+  **About Amazon Auto Scaling**
+
+
+  Amazon EC2 Auto Scaling helps you maintain application availability and lets you automatically add or remove EC2 instances using scaling policies that you define. Dynamic or predictive scaling policies let you add or remove EC2 instance capacity to service established or real-time demand patterns. The fleet management features of Amazon EC2 Auto Scaling help maintain the health and availability of your fleet.
+
+
+  **About the AWS Controllers for Kubernetes**
+
+
+  This controller is a component of the [AWS Controller for Kubernetes](https://github.com/aws/aws-controllers-k8s)
+  project. This project is currently in **developer preview**.
+
+
+  **Pre-Installation Steps**
+
+
+  Please follow the following link: [Red Hat OpenShift](https://aws-controllers-k8s.github.io/community/docs/user-docs/openshift/)
+samples:
+- kind: ExampleCustomKind
+  spec: '{}'
+- kind: SecondExampleCustomKind
+  spec: '{}'
+maintainers:
+- name: "autoscaling maintainer team"
+  email: "ack-maintainers@amazon.com"
+links:
+- name: Amazon EC2 Auto Scaling Developer Resources
+  url: https://aws.amazon.com/ec2/autoscaling/
