@@ -39,6 +39,8 @@ import (
 	svctypes "github.com/aws-controllers-k8s/autoscaling-controller/apis/v1alpha1"
 	svcresource "github.com/aws-controllers-k8s/autoscaling-controller/pkg/resource"
 
+	_ "github.com/aws-controllers-k8s/autoscaling-controller/pkg/resource/auto_scaling_group"
+
 	"github.com/aws-controllers-k8s/autoscaling-controller/pkg/version"
 )
 
