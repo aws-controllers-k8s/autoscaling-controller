@@ -33,6 +33,9 @@ func (rm *resourceManager) getTags(
 	tagsSyncer := tags.NewSyncer(rm.sdkapi)
 	tags, err := tagsSyncer.GetTags(ctx, resourceID)
 	if err != nil {
+		// Log error but don't fail the reconciliation
+		// Tags will be empty and can be synced on next reconcile
+		rm.log.V(1).Info("failed to get tags", "error", err, "resourceID", resourceID)
 		return nil
 	}
 	return tags

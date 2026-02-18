@@ -7,32 +7,15 @@ resources:
       AutoScalingGroupName:
         is_primary_key: true
         is_immutable: true
+    tags:
+      ignore: false
     hooks:
       sdk_create_post_set_output:
-        code: |
-          if ko.Spec.Tags != nil {
-              ackcondition.SetSynced(&resource{ko}, corev1.ConditionFalse, nil, nil)
-          }
+        template_path: hooks/auto_scaling_group/sdk_create_post_set_output.go.tpl
       sdk_update_pre_build_request:
-        code: |
-          if delta.DifferentAt("Spec.Tags") {
-              err := rm.syncTags(
-                  ctx,
-                  latest,
-                  desired,
-              )
-              if err != nil {
-                  return nil, err
-              }
-          }
-          if !delta.DifferentExcept("Spec.Tags") {
-              return desired, nil
-          }
-      sdk_read_one_post_set_output:
-        code: |
-          if ko.Spec.AutoScalingGroupName != nil {
-              ko.Spec.Tags = rm.getTags(ctx, *ko.Spec.AutoScalingGroupName)
-          }
+        template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl
+      sdk_read_many_post_set_output:
+        template_path: hooks/auto_scaling_group/sdk_read_many_post_set_output.go.tpl
 
 ignore:
   resource_names:
