@@ -208,6 +208,11 @@ type Group struct {
 	EnabledMetrics                   []*EnabledMetric                  `json:"enabledMetrics,omitempty"`
 	HealthCheckGracePeriod           *int64                            `json:"healthCheckGracePeriod,omitempty"`
 	HealthCheckType                  *string                           `json:"healthCheckType,omitempty"`
+	// Defines the lifecycle policy for instances in an Auto Scaling group. This
+	// policy controls instance behavior when lifecycles transition and operations
+	// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
+	// or applications requiring extended draining periods.
+	InstanceLifecyclePolicy *InstanceLifecyclePolicy `json:"instanceLifecyclePolicy,omitempty"`
 	// Describes an instance maintenance policy.
 	//
 	// For more information, see Set instance maintenance policy (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-maintenance-policy.html)
@@ -253,6 +258,7 @@ type Group struct {
 type Instance struct {
 	AvailabilityZone        *string `json:"availabilityZone,omitempty"`
 	HealthStatus            *string `json:"healthStatus,omitempty"`
+	ImageID                 *string `json:"imageID,omitempty"`
 	InstanceID              *string `json:"instanceID,omitempty"`
 	InstanceType            *string `json:"instanceType,omitempty"`
 	LaunchConfigurationName *string `json:"launchConfigurationName,omitempty"`
@@ -266,11 +272,21 @@ type Instance struct {
 	WeightedCapacity     *string                      `json:"weightedCapacity,omitempty"`
 }
 
+// Contains details about a collection of instances launched in the Auto Scaling
+// group.
+type InstanceCollection struct {
+	AvailabilityZone   *string `json:"availabilityZone,omitempty"`
+	AvailabilityZoneID *string `json:"availabilityZoneID,omitempty"`
+	InstanceType       *string `json:"instanceType,omitempty"`
+	SubnetID           *string `json:"subnetID,omitempty"`
+}
+
 // Describes an EC2 instance associated with an Auto Scaling group.
 type InstanceDetails struct {
 	AutoScalingGroupName    *string `json:"autoScalingGroupName,omitempty"`
 	AvailabilityZone        *string `json:"availabilityZone,omitempty"`
 	HealthStatus            *string `json:"healthStatus,omitempty"`
+	ImageID                 *string `json:"imageID,omitempty"`
 	InstanceID              *string `json:"instanceID,omitempty"`
 	InstanceType            *string `json:"instanceType,omitempty"`
 	LaunchConfigurationName *string `json:"launchConfigurationName,omitempty"`
@@ -282,6 +298,18 @@ type InstanceDetails struct {
 	LifecycleState       *string                      `json:"lifecycleState,omitempty"`
 	ProtectedFromScaleIn *bool                        `json:"protectedFromScaleIn,omitempty"`
 	WeightedCapacity     *string                      `json:"weightedCapacity,omitempty"`
+}
+
+// Defines the lifecycle policy for instances in an Auto Scaling group. This
+// policy controls instance behavior when lifecycles transition and operations
+// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
+// or applications requiring extended draining periods.
+type InstanceLifecyclePolicy struct {
+	// Defines the specific triggers that cause instances to be retained in a Retained
+	// state rather than terminated. Each trigger corresponds to a different failure
+	// scenario during the instance lifecycle. This allows fine-grained control
+	// over when to preserve instances for manual intervention.
+	RetentionTriggers *RetentionTriggers `json:"retentionTriggers,omitempty"`
 }
 
 // Describes an instance maintenance policy.
@@ -328,7 +356,7 @@ type InstanceRefresh struct {
 // in the Amazon EC2 Auto Scaling User Guide. For help determining which instance
 // types match your attributes before you apply them to your Auto Scaling group,
 // see Preview instance types with specified attributes (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-attribute-based-instance-type-selection.html#ec2fleet-get-instance-types-from-instance-requirements)
-// in the Amazon EC2 User Guide for Linux Instances.
+// in the Amazon EC2 User Guide.
 type InstanceRequirements struct {
 	// Specifies the minimum and maximum for the AcceleratorCount object when you
 	// specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
@@ -381,7 +409,7 @@ type InstanceRequirements struct {
 	// support the specified minimum bandwidth, but the actual bandwidth of your
 	// instance might go below the specified minimum at times. For more information,
 	// see Available instance bandwidth (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html#available-instance-bandwidth)
-	// in the Amazon EC2 User Guide for Linux Instances.
+	// in the Amazon EC2 User Guide.
 	NetworkBandwidthGbps *NetworkBandwidthGbpsRequest `json:"networkBandwidthGbps,omitempty"`
 	// Specifies the minimum and maximum for the NetworkInterfaceCount object when
 	// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
@@ -434,6 +462,15 @@ type LaunchConfiguration struct {
 	RAMDiskID               *string      `json:"ramDiskID,omitempty"`
 }
 
+// Contains details about errors encountered during instance launch attempts.
+type LaunchInstancesError struct {
+	AvailabilityZone   *string `json:"availabilityZone,omitempty"`
+	AvailabilityZoneID *string `json:"availabilityZoneID,omitempty"`
+	ErrorMessage       *string `json:"errorMessage,omitempty"`
+	InstanceType       *string `json:"instanceType,omitempty"`
+	SubnetID           *string `json:"subnetID,omitempty"`
+}
+
 // Use this structure to specify the launch templates and instance types (overrides)
 // for a mixed instances policy.
 type LaunchTemplate struct {
@@ -464,6 +501,7 @@ type LaunchTemplate struct {
 // Scaling uses the instance requirements of the Auto Scaling group to determine
 // whether a new EC2 instance type can be used.
 type LaunchTemplateOverrides struct {
+	ImageID *string `json:"imageID,omitempty"`
 	// The attributes for the instance types for a mixed instances policy. Amazon
 	// EC2 Auto Scaling uses your specified requirements to identify instance types.
 	// Then, it uses your On-Demand and Spot allocation strategies to launch instances
@@ -491,7 +529,7 @@ type LaunchTemplateOverrides struct {
 	// in the Amazon EC2 Auto Scaling User Guide. For help determining which instance
 	// types match your attributes before you apply them to your Auto Scaling group,
 	// see Preview instance types with specified attributes (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-attribute-based-instance-type-selection.html#ec2fleet-get-instance-types-from-instance-requirements)
-	// in the Amazon EC2 User Guide for Linux Instances.
+	// in the Amazon EC2 User Guide.
 	InstanceRequirements *InstanceRequirements `json:"instanceRequirements,omitempty"`
 	InstanceType         *string               `json:"instanceType,omitempty"`
 	// Describes the launch template and the version of the launch template that
@@ -618,7 +656,7 @@ type MixedInstancesPolicy struct {
 // support the specified minimum bandwidth, but the actual bandwidth of your
 // instance might go below the specified minimum at times. For more information,
 // see Available instance bandwidth (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html#available-instance-bandwidth)
-// in the Amazon EC2 User Guide for Linux Instances.
+// in the Amazon EC2 User Guide.
 type NetworkBandwidthGbpsRequest struct {
 	Max *float64 `json:"max,omitempty"`
 	Min *float64 `json:"min,omitempty"`
@@ -655,6 +693,14 @@ type PerformanceFactorReferenceRequest struct {
 // in the Amazon EC2 Auto Scaling User Guide.
 type ProcessType struct {
 	ProcessName *string `json:"processName,omitempty"`
+}
+
+// Defines the specific triggers that cause instances to be retained in a Retained
+// state rather than terminated. Each trigger corresponds to a different failure
+// scenario during the instance lifecycle. This allows fine-grained control
+// over when to preserve instances for manual intervention.
+type RetentionTriggers struct {
+	TerminateHookAbandon *string `json:"terminateHookAbandon,omitempty"`
 }
 
 // Details about an instance refresh rollback.

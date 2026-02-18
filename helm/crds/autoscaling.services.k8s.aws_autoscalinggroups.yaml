@@ -212,6 +212,27 @@ spec:
 
                   Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
                 type: string
+              instanceLifecyclePolicy:
+                description: |-
+                  The instance lifecycle policy for the Auto Scaling group. This policy controls
+                  instance behavior when an instance transitions through its lifecycle states.
+                  Configure retention triggers to specify when instances should move to a Retained
+                  state for manual intervention instead of automatic termination.
+
+                  Instances in a Retained state will continue to incur standard EC2 charges
+                  until terminated.
+                properties:
+                  retentionTriggers:
+                    description: |-
+                      Defines the specific triggers that cause instances to be retained in a Retained
+                      state rather than terminated. Each trigger corresponds to a different failure
+                      scenario during the instance lifecycle. This allows fine-grained control
+                      over when to preserve instances for manual intervention.
+                    properties:
+                      terminateHookAbandon:
+                        type: string
+                    type: object
+                type: object
               instanceMaintenancePolicy:
                 description: |-
                   An instance maintenance policy. For more information, see Set instance maintenance
@@ -386,6 +407,8 @@ spec:
                             Scaling uses the instance requirements of the Auto Scaling group to determine
                             whether a new EC2 instance type can be used.
                           properties:
+                            imageID:
+                              type: string
                             instanceRequirements:
                               description: |-
                                 The attributes for the instance types for a mixed instances policy. Amazon
@@ -415,7 +438,7 @@ spec:
                                 in the Amazon EC2 Auto Scaling User Guide. For help determining which instance
                                 types match your attributes before you apply them to your Auto Scaling group,
                                 see Preview instance types with specified attributes (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-attribute-based-instance-type-selection.html#ec2fleet-get-instance-types-from-instance-requirements)
-                                in the Amazon EC2 User Guide for Linux Instances.
+                                in the Amazon EC2 User Guide.
                               properties:
                                 acceleratorCount:
                                   description: |-
@@ -565,7 +588,7 @@ spec:
                                     support the specified minimum bandwidth, but the actual bandwidth of your
                                     instance might go below the specified minimum at times. For more information,
                                     see Available instance bandwidth (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html#available-instance-bandwidth)
-                                    in the Amazon EC2 User Guide for Linux Instances.
+                                    in the Amazon EC2 User Guide.
                                   properties:
                                     max:
                                       type: number
@@ -652,7 +675,7 @@ spec:
                 description: |-
                   The name of the placement group into which to launch your instances. For
                   more information, see Placement groups (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html)
-                  in the Amazon EC2 User Guide for Linux Instances.
+                  in the Amazon EC2 User Guide.
 
                   A cluster placement group is a logical grouping of instances within a single
                   Availability Zone. You cannot specify multiple Availability Zones and a cluster

@@ -138,6 +138,14 @@ type AutoScalingGroupSpec struct {
 	//
 	// Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
 	InstanceID *string `json:"instanceID,omitempty"`
+	// The instance lifecycle policy for the Auto Scaling group. This policy controls
+	// instance behavior when an instance transitions through its lifecycle states.
+	// Configure retention triggers to specify when instances should move to a Retained
+	// state for manual intervention instead of automatic termination.
+	//
+	// Instances in a Retained state will continue to incur standard EC2 charges
+	// until terminated.
+	InstanceLifecyclePolicy *InstanceLifecyclePolicy `json:"instanceLifecyclePolicy,omitempty"`
 	// An instance maintenance policy. For more information, see Set instance maintenance
 	// policy (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-maintenance-policy.html)
 	// in the Amazon EC2 Auto Scaling User Guide.
@@ -199,7 +207,7 @@ type AutoScalingGroupSpec struct {
 	NewInstancesProtectedFromScaleIn *bool `json:"newInstancesProtectedFromScaleIn,omitempty"`
 	// The name of the placement group into which to launch your instances. For
 	// more information, see Placement groups (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html)
-	// in the Amazon EC2 User Guide for Linux Instances.
+	// in the Amazon EC2 User Guide.
 	//
 	// A cluster placement group is a logical grouping of instances within a single
 	// Availability Zone. You cannot specify multiple Availability Zones and a cluster

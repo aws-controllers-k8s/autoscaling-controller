@@ -177,6 +177,21 @@ func newResourceDelta(
 			delta.Add("Spec.InstanceID", a.ko.Spec.InstanceID, b.ko.Spec.InstanceID)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.InstanceLifecyclePolicy, b.ko.Spec.InstanceLifecyclePolicy) {
+		delta.Add("Spec.InstanceLifecyclePolicy", a.ko.Spec.InstanceLifecyclePolicy, b.ko.Spec.InstanceLifecyclePolicy)
+	} else if a.ko.Spec.InstanceLifecyclePolicy != nil && b.ko.Spec.InstanceLifecyclePolicy != nil {
+		if ackcompare.HasNilDifference(a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers, b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers) {
+			delta.Add("Spec.InstanceLifecyclePolicy.RetentionTriggers", a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers, b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers)
+		} else if a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers != nil && b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers != nil {
+			if ackcompare.HasNilDifference(a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon, b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon) {
+				delta.Add("Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon", a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon, b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
+			} else if a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon != nil && b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon != nil {
+				if *a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon != *b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon {
+					delta.Add("Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon", a.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon, b.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
+				}
+			}
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.InstanceMaintenancePolicy, b.ko.Spec.InstanceMaintenancePolicy) {
 		delta.Add("Spec.InstanceMaintenancePolicy", a.ko.Spec.InstanceMaintenancePolicy, b.ko.Spec.InstanceMaintenancePolicy)
 	} else if a.ko.Spec.InstanceMaintenancePolicy != nil && b.ko.Spec.InstanceMaintenancePolicy != nil {
