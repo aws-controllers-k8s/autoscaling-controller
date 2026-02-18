@@ -65,7 +65,6 @@ type CPUManufacturer string
 const (
 	CPUManufacturer_amazon_web_services CPUManufacturer = "amazon-web-services"
 	CPUManufacturer_amd                 CPUManufacturer = "amd"
-	CPUManufacturer_apple               CPUManufacturer = "apple"
 	CPUManufacturer_intel               CPUManufacturer = "intel"
 )
 
@@ -234,22 +233,7 @@ const (
 type RefreshStrategy string
 
 const (
-	RefreshStrategy_ReplaceRootVolume RefreshStrategy = "ReplaceRootVolume"
-	RefreshStrategy_Rolling           RefreshStrategy = "Rolling"
-)
-
-type RetentionAction string
-
-const (
-	RetentionAction_retain    RetentionAction = "retain"
-	RetentionAction_terminate RetentionAction = "terminate"
-)
-
-type RetryStrategy string
-
-const (
-	RetryStrategy_none                           RetryStrategy = "none"
-	RetryStrategy_retry_with_group_configuration RetryStrategy = "retry-with-group-configuration"
+	RefreshStrategy_Rolling RefreshStrategy = "Rolling"
 )
 
 type ScaleInProtectedInstances string
@@ -263,22 +247,19 @@ const (
 type ScalingActivityStatusCode string
 
 const (
-	ScalingActivityStatusCode_Cancelled                         ScalingActivityStatusCode = "Cancelled"
-	ScalingActivityStatusCode_Failed                            ScalingActivityStatusCode = "Failed"
-	ScalingActivityStatusCode_InPlaceUpdateInProgress           ScalingActivityStatusCode = "InPlaceUpdateInProgress"
-	ScalingActivityStatusCode_InProgress                        ScalingActivityStatusCode = "InProgress"
-	ScalingActivityStatusCode_MidLifecycleAction                ScalingActivityStatusCode = "MidLifecycleAction"
-	ScalingActivityStatusCode_PendingSpotBidPlacement           ScalingActivityStatusCode = "PendingSpotBidPlacement"
-	ScalingActivityStatusCode_PreInService                      ScalingActivityStatusCode = "PreInService"
-	ScalingActivityStatusCode_Successful                        ScalingActivityStatusCode = "Successful"
-	ScalingActivityStatusCode_WaitingForConnectionDraining      ScalingActivityStatusCode = "WaitingForConnectionDraining"
-	ScalingActivityStatusCode_WaitingForELBConnectionDraining   ScalingActivityStatusCode = "WaitingForELBConnectionDraining"
-	ScalingActivityStatusCode_WaitingForInPlaceUpdateToFinalize ScalingActivityStatusCode = "WaitingForInPlaceUpdateToFinalize"
-	ScalingActivityStatusCode_WaitingForInPlaceUpdateToStart    ScalingActivityStatusCode = "WaitingForInPlaceUpdateToStart"
-	ScalingActivityStatusCode_WaitingForInstanceId              ScalingActivityStatusCode = "WaitingForInstanceId"
-	ScalingActivityStatusCode_WaitingForInstanceWarmup          ScalingActivityStatusCode = "WaitingForInstanceWarmup"
-	ScalingActivityStatusCode_WaitingForSpotInstanceId          ScalingActivityStatusCode = "WaitingForSpotInstanceId"
-	ScalingActivityStatusCode_WaitingForSpotInstanceRequestId   ScalingActivityStatusCode = "WaitingForSpotInstanceRequestId"
+	ScalingActivityStatusCode_Cancelled                       ScalingActivityStatusCode = "Cancelled"
+	ScalingActivityStatusCode_Failed                          ScalingActivityStatusCode = "Failed"
+	ScalingActivityStatusCode_InProgress                      ScalingActivityStatusCode = "InProgress"
+	ScalingActivityStatusCode_MidLifecycleAction              ScalingActivityStatusCode = "MidLifecycleAction"
+	ScalingActivityStatusCode_PendingSpotBidPlacement         ScalingActivityStatusCode = "PendingSpotBidPlacement"
+	ScalingActivityStatusCode_PreInService                    ScalingActivityStatusCode = "PreInService"
+	ScalingActivityStatusCode_Successful                      ScalingActivityStatusCode = "Successful"
+	ScalingActivityStatusCode_WaitingForConnectionDraining    ScalingActivityStatusCode = "WaitingForConnectionDraining"
+	ScalingActivityStatusCode_WaitingForELBConnectionDraining ScalingActivityStatusCode = "WaitingForELBConnectionDraining"
+	ScalingActivityStatusCode_WaitingForInstanceId            ScalingActivityStatusCode = "WaitingForInstanceId"
+	ScalingActivityStatusCode_WaitingForInstanceWarmup        ScalingActivityStatusCode = "WaitingForInstanceWarmup"
+	ScalingActivityStatusCode_WaitingForSpotInstanceId        ScalingActivityStatusCode = "WaitingForSpotInstanceId"
+	ScalingActivityStatusCode_WaitingForSpotInstanceRequestId ScalingActivityStatusCode = "WaitingForSpotInstanceRequestId"
 )
 
 type StandbyInstances string

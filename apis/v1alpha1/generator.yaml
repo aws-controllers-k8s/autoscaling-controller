@@ -1,7 +1,39 @@
 sdk_names:
   model_name: auto-scaling
 
+resources:
+  AutoScalingGroup:
+    fields:
+      AutoScalingGroupName:
+        is_primary_key: true
+        is_immutable: true
+    hooks:
+      sdk_create_post_set_output:
+        code: |
+          if ko.Spec.Tags != nil {
+              ackcondition.SetSynced(&resource{ko}, corev1.ConditionFalse, nil, nil)
+          }
+      sdk_update_pre_build_request:
+        code: |
+          if delta.DifferentAt("Spec.Tags") {
+              err := rm.syncTags(
+                  ctx,
+                  latest,
+                  desired,
+              )
+              if err != nil {
+                  return nil, err
+              }
+          }
+          if !delta.DifferentExcept("Spec.Tags") {
+              return desired, nil
+          }
+      sdk_read_one_post_set_output:
+        code: |
+          if ko.Spec.AutoScalingGroupName != nil {
+              ko.Spec.Tags = rm.getTags(ctx, *ko.Spec.AutoScalingGroupName)
+          }
+
 ignore:
   resource_names:
-      - AutoScalingGroup
       - LaunchConfiguration
