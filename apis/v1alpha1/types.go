@@ -27,3 +27,792 @@ var (
 	_ = &aws.JSONValue{}
 	_ = ackv1alpha1.AWSAccountID("")
 )
+
+// Specifies the minimum and maximum for the AcceleratorCount object when you
+// specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type AcceleratorCountRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Specifies the minimum and maximum for the AcceleratorTotalMemoryMiB object
+// when you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type AcceleratorTotalMemoryMiBRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Describes scaling activity, which is a long-running process that represents
+// a change to your Auto Scaling group, such as changing its size or replacing
+// an instance.
+type Activity struct {
+	ActivityID           *string      `json:"activityID,omitempty"`
+	AutoScalingGroupARN  *string      `json:"autoScalingGroupARN,omitempty"`
+	AutoScalingGroupName *string      `json:"autoScalingGroupName,omitempty"`
+	Description          *string      `json:"description,omitempty"`
+	Details              *string      `json:"details,omitempty"`
+	EndTime              *metav1.Time `json:"endTime,omitempty"`
+	StartTime            *metav1.Time `json:"startTime,omitempty"`
+	StatusMessage        *string      `json:"statusMessage,omitempty"`
+}
+
+// Describes a policy adjustment type.
+type AdjustmentType struct {
+	AdjustmentType *string `json:"adjustmentType,omitempty"`
+}
+
+// Describes an alarm.
+type Alarm struct {
+	AlarmARN  *string `json:"alarmARN,omitempty"`
+	AlarmName *string `json:"alarmName,omitempty"`
+}
+
+// Describes an Availability Zone distribution.
+type AvailabilityZoneDistribution struct {
+	CapacityDistributionStrategy *string `json:"capacityDistributionStrategy,omitempty"`
+}
+
+// Describes an Availability Zone impairment policy.
+type AvailabilityZoneImpairmentPolicy struct {
+	ImpairedZoneHealthCheckBehavior *string `json:"impairedZoneHealthCheckBehavior,omitempty"`
+	ZonalShiftEnabled               *bool   `json:"zonalShiftEnabled,omitempty"`
+}
+
+// Specifies the minimum and maximum for the BaselineEbsBandwidthMbps object
+// when you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type BaselineEBSBandwidthMbpsRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// The baseline performance to consider, using an instance family as a baseline
+// reference. The instance family establishes the lowest acceptable level of
+// performance. Auto Scaling uses this baseline to guide instance type selection,
+// but there is no guarantee that the selected instance types will always exceed
+// the baseline for every application.
+//
+// Currently, this parameter only supports CPU performance as a baseline performance
+// factor. For example, specifying c6i uses the CPU performance of the c6i family
+// as the baseline reference.
+type BaselinePerformanceFactorsRequest struct {
+	// The CPU performance to consider, using an instance family as the baseline
+	// reference.
+	CPU *CPUPerformanceFactorRequest `json:"cpu,omitempty"`
+}
+
+// Describes a block device mapping.
+type BlockDeviceMapping struct {
+	DeviceName  *string `json:"deviceName,omitempty"`
+	VirtualName *string `json:"virtualName,omitempty"`
+}
+
+// The CPU performance to consider, using an instance family as the baseline
+// reference.
+type CPUPerformanceFactorRequest struct {
+	References []*PerformanceFactorReferenceRequest `json:"references,omitempty"`
+}
+
+// Describes the Capacity Reservation preference and targeting options. If you
+// specify open or none for CapacityReservationPreference, do not specify a
+// CapacityReservationTarget.
+type CapacityReservationSpecification struct {
+	CapacityReservationPreference *string `json:"capacityReservationPreference,omitempty"`
+	// The target for the Capacity Reservation. Specify Capacity Reservations IDs
+	// or Capacity Reservation resource group ARNs.
+	CapacityReservationTarget *CapacityReservationTarget `json:"capacityReservationTarget,omitempty"`
+}
+
+// The target for the Capacity Reservation. Specify Capacity Reservations IDs
+// or Capacity Reservation resource group ARNs.
+type CapacityReservationTarget struct {
+	CapacityReservationIDs               []*string `json:"capacityReservationIDs,omitempty"`
+	CapacityReservationResourceGroupARNs []*string `json:"capacityReservationResourceGroupARNs,omitempty"`
+}
+
+// Describes the desired configuration for an instance refresh.
+//
+// If you specify a desired configuration, you must specify either a LaunchTemplate
+// or a MixedInstancesPolicy.
+type DesiredConfiguration struct {
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplate *LaunchTemplateSpecification `json:"launchTemplate,omitempty"`
+	// Use this structure to launch multiple instance types and On-Demand Instances
+	// and Spot Instances within a single Auto Scaling group.
+	//
+	// A mixed instances policy contains information that Amazon EC2 Auto Scaling
+	// can use to launch instances and help optimize your costs. For more information,
+	// see Auto Scaling groups with multiple instance types and purchase options
+	// (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	MixedInstancesPolicy *MixedInstancesPolicy `json:"mixedInstancesPolicy,omitempty"`
+}
+
+// Describes information used to set up an Amazon EBS volume specified in a
+// block device mapping.
+type EBS struct {
+	SnapshotID *string `json:"snapshotID,omitempty"`
+}
+
+// Describes an enabled Auto Scaling group metric.
+type EnabledMetric struct {
+	Granularity *string `json:"granularity,omitempty"`
+	Metric      *string `json:"metric,omitempty"`
+}
+
+// Describes a scheduled action that could not be created, updated, or deleted.
+type FailedScheduledUpdateGroupActionRequest struct {
+	ErrorMessage        *string `json:"errorMessage,omitempty"`
+	ScheduledActionName *string `json:"scheduledActionName,omitempty"`
+}
+
+// Describes a filter that is used to return a more specific list of results
+// from a describe operation.
+//
+// If you specify multiple filters, the filters are automatically logically
+// joined with an AND, and the request returns only the results that match all
+// of the specified filters.
+//
+// For more information, see Tag Auto Scaling groups and instances (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-tagging.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type Filter struct {
+	Name   *string   `json:"name,omitempty"`
+	Values []*string `json:"values,omitempty"`
+}
+
+// Describes an Auto Scaling group.
+type Group struct {
+	AutoScalingGroupARN  *string `json:"autoScalingGroupARN,omitempty"`
+	AutoScalingGroupName *string `json:"autoScalingGroupName,omitempty"`
+	// Describes an Availability Zone distribution.
+	AvailabilityZoneDistribution *AvailabilityZoneDistribution `json:"availabilityZoneDistribution,omitempty"`
+	// Describes an Availability Zone impairment policy.
+	AvailabilityZoneImpairmentPolicy *AvailabilityZoneImpairmentPolicy `json:"availabilityZoneImpairmentPolicy,omitempty"`
+	AvailabilityZones                []*string                         `json:"availabilityZones,omitempty"`
+	CapacityRebalance                *bool                             `json:"capacityRebalance,omitempty"`
+	// Describes the Capacity Reservation preference and targeting options. If you
+	// specify open or none for CapacityReservationPreference, do not specify a
+	// CapacityReservationTarget.
+	CapacityReservationSpecification *CapacityReservationSpecification `json:"capacityReservationSpecification,omitempty"`
+	Context                          *string                           `json:"context,omitempty"`
+	CreatedTime                      *metav1.Time                      `json:"createdTime,omitempty"`
+	DefaultCooldown                  *int64                            `json:"defaultCooldown,omitempty"`
+	DefaultInstanceWarmup            *int64                            `json:"defaultInstanceWarmup,omitempty"`
+	DesiredCapacity                  *int64                            `json:"desiredCapacity,omitempty"`
+	DesiredCapacityType              *string                           `json:"desiredCapacityType,omitempty"`
+	EnabledMetrics                   []*EnabledMetric                  `json:"enabledMetrics,omitempty"`
+	HealthCheckGracePeriod           *int64                            `json:"healthCheckGracePeriod,omitempty"`
+	HealthCheckType                  *string                           `json:"healthCheckType,omitempty"`
+	// Defines the lifecycle policy for instances in an Auto Scaling group. This
+	// policy controls instance behavior when lifecycles transition and operations
+	// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
+	// or applications requiring extended draining periods.
+	InstanceLifecyclePolicy *InstanceLifecyclePolicy `json:"instanceLifecyclePolicy,omitempty"`
+	// Describes an instance maintenance policy.
+	//
+	// For more information, see Set instance maintenance policy (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-maintenance-policy.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	InstanceMaintenancePolicy *InstanceMaintenancePolicy `json:"instanceMaintenancePolicy,omitempty"`
+	Instances                 []*Instance                `json:"instances,omitempty"`
+	LaunchConfigurationName   *string                    `json:"launchConfigurationName,omitempty"`
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplate      *LaunchTemplateSpecification `json:"launchTemplate,omitempty"`
+	LoadBalancerNames   []*string                    `json:"loadBalancerNames,omitempty"`
+	MaxInstanceLifetime *int64                       `json:"maxInstanceLifetime,omitempty"`
+	MaxSize             *int64                       `json:"maxSize,omitempty"`
+	MinSize             *int64                       `json:"minSize,omitempty"`
+	// Use this structure to launch multiple instance types and On-Demand Instances
+	// and Spot Instances within a single Auto Scaling group.
+	//
+	// A mixed instances policy contains information that Amazon EC2 Auto Scaling
+	// can use to launch instances and help optimize your costs. For more information,
+	// see Auto Scaling groups with multiple instance types and purchase options
+	// (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	MixedInstancesPolicy             *MixedInstancesPolicy      `json:"mixedInstancesPolicy,omitempty"`
+	NewInstancesProtectedFromScaleIn *bool                      `json:"newInstancesProtectedFromScaleIn,omitempty"`
+	PlacementGroup                   *string                    `json:"placementGroup,omitempty"`
+	PredictedCapacity                *int64                     `json:"predictedCapacity,omitempty"`
+	ServiceLinkedRoleARN             *string                    `json:"serviceLinkedRoleARN,omitempty"`
+	Status                           *string                    `json:"status,omitempty"`
+	SuspendedProcesses               []*SuspendedProcess        `json:"suspendedProcesses,omitempty"`
+	Tags                             []*TagDescription          `json:"tags,omitempty"`
+	TargetGroupARNs                  []*string                  `json:"targetGroupARNs,omitempty"`
+	TerminationPolicies              []*string                  `json:"terminationPolicies,omitempty"`
+	TrafficSources                   []*TrafficSourceIdentifier `json:"trafficSources,omitempty"`
+	VPCZoneIdentifier                *string                    `json:"vpcZoneIdentifier,omitempty"`
+	// Describes a warm pool configuration.
+	WarmPoolConfiguration *WarmPoolConfiguration `json:"warmPoolConfiguration,omitempty"`
+	WarmPoolSize          *int64                 `json:"warmPoolSize,omitempty"`
+}
+
+// Describes an EC2 instance.
+type Instance struct {
+	AvailabilityZone        *string `json:"availabilityZone,omitempty"`
+	HealthStatus            *string `json:"healthStatus,omitempty"`
+	ImageID                 *string `json:"imageID,omitempty"`
+	InstanceID              *string `json:"instanceID,omitempty"`
+	InstanceType            *string `json:"instanceType,omitempty"`
+	LaunchConfigurationName *string `json:"launchConfigurationName,omitempty"`
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplate       *LaunchTemplateSpecification `json:"launchTemplate,omitempty"`
+	LifecycleState       *string                      `json:"lifecycleState,omitempty"`
+	ProtectedFromScaleIn *bool                        `json:"protectedFromScaleIn,omitempty"`
+	WeightedCapacity     *string                      `json:"weightedCapacity,omitempty"`
+}
+
+// Contains details about a collection of instances launched in the Auto Scaling
+// group.
+type InstanceCollection struct {
+	AvailabilityZone   *string `json:"availabilityZone,omitempty"`
+	AvailabilityZoneID *string `json:"availabilityZoneID,omitempty"`
+	InstanceType       *string `json:"instanceType,omitempty"`
+	SubnetID           *string `json:"subnetID,omitempty"`
+}
+
+// Describes an EC2 instance associated with an Auto Scaling group.
+type InstanceDetails struct {
+	AutoScalingGroupName    *string `json:"autoScalingGroupName,omitempty"`
+	AvailabilityZone        *string `json:"availabilityZone,omitempty"`
+	HealthStatus            *string `json:"healthStatus,omitempty"`
+	ImageID                 *string `json:"imageID,omitempty"`
+	InstanceID              *string `json:"instanceID,omitempty"`
+	InstanceType            *string `json:"instanceType,omitempty"`
+	LaunchConfigurationName *string `json:"launchConfigurationName,omitempty"`
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplate       *LaunchTemplateSpecification `json:"launchTemplate,omitempty"`
+	LifecycleState       *string                      `json:"lifecycleState,omitempty"`
+	ProtectedFromScaleIn *bool                        `json:"protectedFromScaleIn,omitempty"`
+	WeightedCapacity     *string                      `json:"weightedCapacity,omitempty"`
+}
+
+// Defines the lifecycle policy for instances in an Auto Scaling group. This
+// policy controls instance behavior when lifecycles transition and operations
+// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
+// or applications requiring extended draining periods.
+type InstanceLifecyclePolicy struct {
+	// Defines the specific triggers that cause instances to be retained in a Retained
+	// state rather than terminated. Each trigger corresponds to a different failure
+	// scenario during the instance lifecycle. This allows fine-grained control
+	// over when to preserve instances for manual intervention.
+	RetentionTriggers *RetentionTriggers `json:"retentionTriggers,omitempty"`
+}
+
+// Describes an instance maintenance policy.
+//
+// For more information, see Set instance maintenance policy (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-maintenance-policy.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type InstanceMaintenancePolicy struct {
+	MaxHealthyPercentage *int64 `json:"maxHealthyPercentage,omitempty"`
+	MinHealthyPercentage *int64 `json:"minHealthyPercentage,omitempty"`
+}
+
+// Describes an instance refresh for an Auto Scaling group.
+type InstanceRefresh struct {
+	AutoScalingGroupName *string      `json:"autoScalingGroupName,omitempty"`
+	EndTime              *metav1.Time `json:"endTime,omitempty"`
+	InstanceRefreshID    *string      `json:"instanceRefreshID,omitempty"`
+	StartTime            *metav1.Time `json:"startTime,omitempty"`
+}
+
+// The attributes for the instance types for a mixed instances policy. Amazon
+// EC2 Auto Scaling uses your specified requirements to identify instance types.
+// Then, it uses your On-Demand and Spot allocation strategies to launch instances
+// from these instance types.
+//
+// When you specify multiple attributes, you get instance types that satisfy
+// all of the specified attributes. If you specify multiple values for an attribute,
+// you get instance types that satisfy any of the specified values.
+//
+// To limit the list of instance types from which Amazon EC2 Auto Scaling can
+// identify matching instance types, you can use one of the following parameters,
+// but not both in the same request:
+//
+//   - AllowedInstanceTypes - The instance types to include in the list. All
+//     other instance types are ignored, even if they match your specified attributes.
+//
+//   - ExcludedInstanceTypes - The instance types to exclude from the list,
+//     even if they match your specified attributes.
+//
+// You must specify VCpuCount and MemoryMiB. All other attributes are optional.
+// Any unspecified optional attribute is set to its default.
+//
+// For more information, see Create a mixed instances group using attribute-based
+// instance type selection (https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-mixed-instances-group-attribute-based-instance-type-selection.html)
+// in the Amazon EC2 Auto Scaling User Guide. For help determining which instance
+// types match your attributes before you apply them to your Auto Scaling group,
+// see Preview instance types with specified attributes (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-attribute-based-instance-type-selection.html#ec2fleet-get-instance-types-from-instance-requirements)
+// in the Amazon EC2 User Guide.
+type InstanceRequirements struct {
+	// Specifies the minimum and maximum for the AcceleratorCount object when you
+	// specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	AcceleratorCount         *AcceleratorCountRequest `json:"acceleratorCount,omitempty"`
+	AcceleratorManufacturers []*string                `json:"acceleratorManufacturers,omitempty"`
+	AcceleratorNames         []*string                `json:"acceleratorNames,omitempty"`
+	// Specifies the minimum and maximum for the AcceleratorTotalMemoryMiB object
+	// when you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	AcceleratorTotalMemoryMiB *AcceleratorTotalMemoryMiBRequest `json:"acceleratorTotalMemoryMiB,omitempty"`
+	AcceleratorTypes          []*string                         `json:"acceleratorTypes,omitempty"`
+	AllowedInstanceTypes      []*string                         `json:"allowedInstanceTypes,omitempty"`
+	BareMetal                 *string                           `json:"bareMetal,omitempty"`
+	// Specifies the minimum and maximum for the BaselineEbsBandwidthMbps object
+	// when you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	BaselineEBSBandwidthMbps *BaselineEBSBandwidthMbpsRequest `json:"baselineEBSBandwidthMbps,omitempty"`
+	// The baseline performance to consider, using an instance family as a baseline
+	// reference. The instance family establishes the lowest acceptable level of
+	// performance. Auto Scaling uses this baseline to guide instance type selection,
+	// but there is no guarantee that the selected instance types will always exceed
+	// the baseline for every application.
+	//
+	// Currently, this parameter only supports CPU performance as a baseline performance
+	// factor. For example, specifying c6i uses the CPU performance of the c6i family
+	// as the baseline reference.
+	BaselinePerformanceFactors                     *BaselinePerformanceFactorsRequest `json:"baselinePerformanceFactors,omitempty"`
+	BurstablePerformance                           *string                            `json:"burstablePerformance,omitempty"`
+	CPUManufacturers                               []*string                          `json:"cpuManufacturers,omitempty"`
+	ExcludedInstanceTypes                          []*string                          `json:"excludedInstanceTypes,omitempty"`
+	InstanceGenerations                            []*string                          `json:"instanceGenerations,omitempty"`
+	LocalStorage                                   *string                            `json:"localStorage,omitempty"`
+	LocalStorageTypes                              []*string                          `json:"localStorageTypes,omitempty"`
+	MaxSpotPriceAsPercentageOfOptimalOnDemandPrice *int64                             `json:"maxSpotPriceAsPercentageOfOptimalOnDemandPrice,omitempty"`
+	// Specifies the minimum and maximum for the MemoryGiBPerVCpu object when you
+	// specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	MemoryGiBPerVCPU *MemoryGiBPerVCPURequest `json:"memoryGiBPerVCPU,omitempty"`
+	// Specifies the minimum and maximum for the MemoryMiB object when you specify
+	// InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	MemoryMiB *MemoryMiBRequest `json:"memoryMiB,omitempty"`
+	// Specifies the minimum and maximum for the NetworkBandwidthGbps object when
+	// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	//
+	// Setting the minimum bandwidth does not guarantee that your instance will
+	// achieve the minimum bandwidth. Amazon EC2 will identify instance types that
+	// support the specified minimum bandwidth, but the actual bandwidth of your
+	// instance might go below the specified minimum at times. For more information,
+	// see Available instance bandwidth (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html#available-instance-bandwidth)
+	// in the Amazon EC2 User Guide.
+	NetworkBandwidthGbps *NetworkBandwidthGbpsRequest `json:"networkBandwidthGbps,omitempty"`
+	// Specifies the minimum and maximum for the NetworkInterfaceCount object when
+	// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	NetworkInterfaceCount                     *NetworkInterfaceCountRequest `json:"networkInterfaceCount,omitempty"`
+	OnDemandMaxPricePercentageOverLowestPrice *int64                        `json:"onDemandMaxPricePercentageOverLowestPrice,omitempty"`
+	RequireHibernateSupport                   *bool                         `json:"requireHibernateSupport,omitempty"`
+	SpotMaxPricePercentageOverLowestPrice     *int64                        `json:"spotMaxPricePercentageOverLowestPrice,omitempty"`
+	// Specifies the minimum and maximum for the TotalLocalStorageGB object when
+	// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	TotalLocalStorageGB *TotalLocalStorageGBRequest `json:"totalLocalStorageGB,omitempty"`
+	// Specifies the minimum and maximum for the VCpuCount object when you specify
+	// InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+	// for an Auto Scaling group.
+	VCPUCount *VCPUCountRequest `json:"vCPUCount,omitempty"`
+}
+
+// Describes an instance reuse policy for a warm pool.
+//
+// For more information, see Warm pools for Amazon EC2 Auto Scaling (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type InstanceReusePolicy struct {
+	ReuseOnScaleIn *bool `json:"reuseOnScaleIn,omitempty"`
+}
+
+// Use this structure to specify the distribution of On-Demand Instances and
+// Spot Instances and the allocation strategies used to fulfill On-Demand and
+// Spot capacities for a mixed instances policy.
+type InstancesDistribution struct {
+	OnDemandAllocationStrategy          *string `json:"onDemandAllocationStrategy,omitempty"`
+	OnDemandBaseCapacity                *int64  `json:"onDemandBaseCapacity,omitempty"`
+	OnDemandPercentageAboveBaseCapacity *int64  `json:"onDemandPercentageAboveBaseCapacity,omitempty"`
+	SpotAllocationStrategy              *string `json:"spotAllocationStrategy,omitempty"`
+	SpotInstancePools                   *int64  `json:"spotInstancePools,omitempty"`
+	SpotMaxPrice                        *string `json:"spotMaxPrice,omitempty"`
+}
+
+// Describes a launch configuration.
+type LaunchConfiguration struct {
+	ClassicLinkVPCID        *string      `json:"classicLinkVPCID,omitempty"`
+	CreatedTime             *metav1.Time `json:"createdTime,omitempty"`
+	IAMInstanceProfile      *string      `json:"iamInstanceProfile,omitempty"`
+	ImageID                 *string      `json:"imageID,omitempty"`
+	InstanceType            *string      `json:"instanceType,omitempty"`
+	KernelID                *string      `json:"kernelID,omitempty"`
+	KeyName                 *string      `json:"keyName,omitempty"`
+	LaunchConfigurationARN  *string      `json:"launchConfigurationARN,omitempty"`
+	LaunchConfigurationName *string      `json:"launchConfigurationName,omitempty"`
+	RAMDiskID               *string      `json:"ramDiskID,omitempty"`
+}
+
+// Contains details about errors encountered during instance launch attempts.
+type LaunchInstancesError struct {
+	AvailabilityZone   *string `json:"availabilityZone,omitempty"`
+	AvailabilityZoneID *string `json:"availabilityZoneID,omitempty"`
+	ErrorMessage       *string `json:"errorMessage,omitempty"`
+	InstanceType       *string `json:"instanceType,omitempty"`
+	SubnetID           *string `json:"subnetID,omitempty"`
+}
+
+// Use this structure to specify the launch templates and instance types (overrides)
+// for a mixed instances policy.
+type LaunchTemplate struct {
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplateSpecification *LaunchTemplateSpecification `json:"launchTemplateSpecification,omitempty"`
+	Overrides                   []*LaunchTemplateOverrides   `json:"overrides,omitempty"`
+}
+
+// Use this structure to let Amazon EC2 Auto Scaling do the following when the
+// Auto Scaling group has a mixed instances policy:
+//
+//   - Override the instance type that is specified in the launch template.
+//
+//   - Use multiple instance types.
+//
+// Specify the instance types that you want, or define your instance requirements
+// instead and let Amazon EC2 Auto Scaling provision the available instance
+// types that meet your requirements. This can provide Amazon EC2 Auto Scaling
+// with a larger selection of instance types to choose from when fulfilling
+// Spot and On-Demand capacities. You can view which instance types are matched
+// before you apply the instance requirements to your Auto Scaling group.
+//
+// After you define your instance requirements, you don't have to keep updating
+// these settings to get new EC2 instance types automatically. Amazon EC2 Auto
+// Scaling uses the instance requirements of the Auto Scaling group to determine
+// whether a new EC2 instance type can be used.
+type LaunchTemplateOverrides struct {
+	ImageID *string `json:"imageID,omitempty"`
+	// The attributes for the instance types for a mixed instances policy. Amazon
+	// EC2 Auto Scaling uses your specified requirements to identify instance types.
+	// Then, it uses your On-Demand and Spot allocation strategies to launch instances
+	// from these instance types.
+	//
+	// When you specify multiple attributes, you get instance types that satisfy
+	// all of the specified attributes. If you specify multiple values for an attribute,
+	// you get instance types that satisfy any of the specified values.
+	//
+	// To limit the list of instance types from which Amazon EC2 Auto Scaling can
+	// identify matching instance types, you can use one of the following parameters,
+	// but not both in the same request:
+	//
+	//    * AllowedInstanceTypes - The instance types to include in the list. All
+	//    other instance types are ignored, even if they match your specified attributes.
+	//
+	//    * ExcludedInstanceTypes - The instance types to exclude from the list,
+	//    even if they match your specified attributes.
+	//
+	// You must specify VCpuCount and MemoryMiB. All other attributes are optional.
+	// Any unspecified optional attribute is set to its default.
+	//
+	// For more information, see Create a mixed instances group using attribute-based
+	// instance type selection (https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-mixed-instances-group-attribute-based-instance-type-selection.html)
+	// in the Amazon EC2 Auto Scaling User Guide. For help determining which instance
+	// types match your attributes before you apply them to your Auto Scaling group,
+	// see Preview instance types with specified attributes (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-attribute-based-instance-type-selection.html#ec2fleet-get-instance-types-from-instance-requirements)
+	// in the Amazon EC2 User Guide.
+	InstanceRequirements *InstanceRequirements `json:"instanceRequirements,omitempty"`
+	InstanceType         *string               `json:"instanceType,omitempty"`
+	// Describes the launch template and the version of the launch template that
+	// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+	// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	LaunchTemplateSpecification *LaunchTemplateSpecification `json:"launchTemplateSpecification,omitempty"`
+	WeightedCapacity            *string                      `json:"weightedCapacity,omitempty"`
+}
+
+// Describes the launch template and the version of the launch template that
+// Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
+// about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type LaunchTemplateSpecification struct {
+	LaunchTemplateID   *string `json:"launchTemplateID,omitempty"`
+	LaunchTemplateName *string `json:"launchTemplateName,omitempty"`
+	Version            *string `json:"version,omitempty"`
+}
+
+// Describes a lifecycle hook. A lifecycle hook lets you create solutions that
+// are aware of events in the Auto Scaling instance lifecycle, and then perform
+// a custom action on instances when the corresponding lifecycle event occurs.
+type LifecycleHook struct {
+	AutoScalingGroupName  *string `json:"autoScalingGroupName,omitempty"`
+	DefaultResult         *string `json:"defaultResult,omitempty"`
+	HeartbeatTimeout      *int64  `json:"heartbeatTimeout,omitempty"`
+	LifecycleHookName     *string `json:"lifecycleHookName,omitempty"`
+	LifecycleTransition   *string `json:"lifecycleTransition,omitempty"`
+	NotificationMetadata  *string `json:"notificationMetadata,omitempty"`
+	NotificationTargetARN *string `json:"notificationTargetARN,omitempty"`
+	RoleARN               *string `json:"roleARN,omitempty"`
+}
+
+// Describes information used to specify a lifecycle hook for an Auto Scaling
+// group.
+//
+// For more information, see Amazon EC2 Auto Scaling lifecycle hooks (https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type LifecycleHookSpecification struct {
+	DefaultResult         *string `json:"defaultResult,omitempty"`
+	HeartbeatTimeout      *int64  `json:"heartbeatTimeout,omitempty"`
+	LifecycleHookName     *string `json:"lifecycleHookName,omitempty"`
+	LifecycleTransition   *string `json:"lifecycleTransition,omitempty"`
+	NotificationMetadata  *string `json:"notificationMetadata,omitempty"`
+	NotificationTargetARN *string `json:"notificationTargetARN,omitempty"`
+	RoleARN               *string `json:"roleARN,omitempty"`
+}
+
+// Describes the state of a Classic Load Balancer.
+type LoadBalancerState struct {
+	LoadBalancerName *string `json:"loadBalancerName,omitempty"`
+	State            *string `json:"state,omitempty"`
+}
+
+// Describes the state of a target group.
+type LoadBalancerTargetGroupState struct {
+	LoadBalancerTargetGroupARN *string `json:"loadBalancerTargetGroupARN,omitempty"`
+	State                      *string `json:"state,omitempty"`
+}
+
+// Specifies the minimum and maximum for the MemoryGiBPerVCpu object when you
+// specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type MemoryGiBPerVCPURequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
+}
+
+// Specifies the minimum and maximum for the MemoryMiB object when you specify
+// InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type MemoryMiBRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Describes a metric.
+type MetricCollectionType struct {
+	Metric *string `json:"metric,omitempty"`
+}
+
+// The metric data to return. Also defines whether this call is returning data
+// for one metric only, or whether it is performing a math expression on the
+// values of returned metric statistics to create a new time series. A time
+// series is a series of data points, each of which is associated with a timestamp.
+//
+// For more information and examples, see Advanced predictive scaling policy
+// configurations using custom metrics (https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-customized-metric-specification.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type MetricDataQuery struct {
+	ID *string `json:"id,omitempty"`
+}
+
+// Describes a granularity of a metric.
+type MetricGranularityType struct {
+	Granularity *string `json:"granularity,omitempty"`
+}
+
+// Use this structure to launch multiple instance types and On-Demand Instances
+// and Spot Instances within a single Auto Scaling group.
+//
+// A mixed instances policy contains information that Amazon EC2 Auto Scaling
+// can use to launch instances and help optimize your costs. For more information,
+// see Auto Scaling groups with multiple instance types and purchase options
+// (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+type MixedInstancesPolicy struct {
+	// Use this structure to specify the distribution of On-Demand Instances and
+	// Spot Instances and the allocation strategies used to fulfill On-Demand and
+	// Spot capacities for a mixed instances policy.
+	InstancesDistribution *InstancesDistribution `json:"instancesDistribution,omitempty"`
+	// Use this structure to specify the launch templates and instance types (overrides)
+	// for a mixed instances policy.
+	LaunchTemplate *LaunchTemplate `json:"launchTemplate,omitempty"`
+}
+
+// Specifies the minimum and maximum for the NetworkBandwidthGbps object when
+// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+//
+// Setting the minimum bandwidth does not guarantee that your instance will
+// achieve the minimum bandwidth. Amazon EC2 will identify instance types that
+// support the specified minimum bandwidth, but the actual bandwidth of your
+// instance might go below the specified minimum at times. For more information,
+// see Available instance bandwidth (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html#available-instance-bandwidth)
+// in the Amazon EC2 User Guide.
+type NetworkBandwidthGbpsRequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
+}
+
+// Specifies the minimum and maximum for the NetworkInterfaceCount object when
+// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type NetworkInterfaceCountRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Describes a notification.
+type NotificationConfiguration struct {
+	AutoScalingGroupName *string `json:"autoScalingGroupName,omitempty"`
+	NotificationType     *string `json:"notificationType,omitempty"`
+	TopicARN             *string `json:"topicARN,omitempty"`
+}
+
+// Specify an instance family to use as the baseline reference for CPU performance.
+// All instance types that All instance types that match your specified attributes
+// will be compared against the CPU performance of the referenced instance family,
+// regardless of CPU manufacturer or architecture differences.
+//
+// Currently only one instance family can be specified in the list.
+type PerformanceFactorReferenceRequest struct {
+	InstanceFamily *string `json:"instanceFamily,omitempty"`
+}
+
+// Describes a process type.
+//
+// For more information, see Types of processes (https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html#process-types)
+// in the Amazon EC2 Auto Scaling User Guide.
+type ProcessType struct {
+	ProcessName *string `json:"processName,omitempty"`
+}
+
+// Defines the specific triggers that cause instances to be retained in a Retained
+// state rather than terminated. Each trigger corresponds to a different failure
+// scenario during the instance lifecycle. This allows fine-grained control
+// over when to preserve instances for manual intervention.
+type RetentionTriggers struct {
+	TerminateHookAbandon *string `json:"terminateHookAbandon,omitempty"`
+}
+
+// Details about an instance refresh rollback.
+type RollbackDetails struct {
+	RollbackStartTime *metav1.Time `json:"rollbackStartTime,omitempty"`
+}
+
+// Describes a scaling policy.
+type ScalingPolicy struct {
+	AdjustmentType        *string `json:"adjustmentType,omitempty"`
+	AutoScalingGroupName  *string `json:"autoScalingGroupName,omitempty"`
+	Cooldown              *int64  `json:"cooldown,omitempty"`
+	MetricAggregationType *string `json:"metricAggregationType,omitempty"`
+	PolicyARN             *string `json:"policyARN,omitempty"`
+	PolicyName            *string `json:"policyName,omitempty"`
+}
+
+// Describes a scheduled scaling action.
+type ScheduledUpdateGroupAction struct {
+	AutoScalingGroupName *string      `json:"autoScalingGroupName,omitempty"`
+	DesiredCapacity      *int64       `json:"desiredCapacity,omitempty"`
+	EndTime              *metav1.Time `json:"endTime,omitempty"`
+	MaxSize              *int64       `json:"maxSize,omitempty"`
+	MinSize              *int64       `json:"minSize,omitempty"`
+	Recurrence           *string      `json:"recurrence,omitempty"`
+	ScheduledActionARN   *string      `json:"scheduledActionARN,omitempty"`
+	ScheduledActionName  *string      `json:"scheduledActionName,omitempty"`
+	StartTime            *metav1.Time `json:"startTime,omitempty"`
+	Time                 *metav1.Time `json:"time,omitempty"`
+	TimeZone             *string      `json:"timeZone,omitempty"`
+}
+
+// Describes information used for one or more scheduled scaling action updates
+// in a BatchPutScheduledUpdateGroupAction (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_BatchPutScheduledUpdateGroupAction.html)
+// operation.
+type ScheduledUpdateGroupActionRequest struct {
+	DesiredCapacity     *int64       `json:"desiredCapacity,omitempty"`
+	EndTime             *metav1.Time `json:"endTime,omitempty"`
+	MaxSize             *int64       `json:"maxSize,omitempty"`
+	MinSize             *int64       `json:"minSize,omitempty"`
+	Recurrence          *string      `json:"recurrence,omitempty"`
+	ScheduledActionName *string      `json:"scheduledActionName,omitempty"`
+	StartTime           *metav1.Time `json:"startTime,omitempty"`
+	TimeZone            *string      `json:"timeZone,omitempty"`
+}
+
+// Describes an auto scaling process that has been suspended.
+//
+// For more information, see Types of processes (https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html#process-types)
+// in the Amazon EC2 Auto Scaling User Guide.
+type SuspendedProcess struct {
+	ProcessName      *string `json:"processName,omitempty"`
+	SuspensionReason *string `json:"suspensionReason,omitempty"`
+}
+
+// Describes a tag for an Auto Scaling group.
+type Tag struct {
+	Key               *string `json:"key,omitempty"`
+	PropagateAtLaunch *bool   `json:"propagateAtLaunch,omitempty"`
+	ResourceID        *string `json:"resourceID,omitempty"`
+	ResourceType      *string `json:"resourceType,omitempty"`
+	Value             *string `json:"value,omitempty"`
+}
+
+// Describes a tag for an Auto Scaling group.
+type TagDescription struct {
+	Key               *string `json:"key,omitempty"`
+	PropagateAtLaunch *bool   `json:"propagateAtLaunch,omitempty"`
+	ResourceID        *string `json:"resourceID,omitempty"`
+	ResourceType      *string `json:"resourceType,omitempty"`
+	Value             *string `json:"value,omitempty"`
+}
+
+// Specifies the minimum and maximum for the TotalLocalStorageGB object when
+// you specify InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type TotalLocalStorageGBRequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
+}
+
+// Identifying information for a traffic source.
+type TrafficSourceIdentifier struct {
+	Identifier *string `json:"identifier,omitempty"`
+	Type       *string `json:"type_,omitempty"`
+}
+
+// Describes the state of a traffic source.
+type TrafficSourceState struct {
+	Identifier    *string `json:"identifier,omitempty"`
+	State         *string `json:"state,omitempty"`
+	TrafficSource *string `json:"trafficSource,omitempty"`
+	Type          *string `json:"type_,omitempty"`
+}
+
+// Specifies the minimum and maximum for the VCpuCount object when you specify
+// InstanceRequirements (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html)
+// for an Auto Scaling group.
+type VCPUCountRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Describes a warm pool configuration.
+type WarmPoolConfiguration struct {
+	// Describes an instance reuse policy for a warm pool.
+	//
+	// For more information, see Warm pools for Amazon EC2 Auto Scaling (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	InstanceReusePolicy      *InstanceReusePolicy `json:"instanceReusePolicy,omitempty"`
+	MaxGroupPreparedCapacity *int64               `json:"maxGroupPreparedCapacity,omitempty"`
+	MinSize                  *int64               `json:"minSize,omitempty"`
+	PoolState                *string              `json:"poolState,omitempty"`
+	Status                   *string              `json:"status,omitempty"`
+}

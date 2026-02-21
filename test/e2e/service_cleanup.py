@@ -15,16 +15,32 @@
 """
 
 import logging
+import boto3
 
 from acktest.bootstrapping import Resources
 
 from e2e import bootstrap_directory
+from e2e.bootstrap_resources import BootstrapResources
 
 def service_cleanup():
     logging.getLogger().setLevel(logging.INFO)
 
-    resources = Resources.deserialize(bootstrap_directory)
-    resources.cleanup()
+    try:
+        resources = BootstrapResources.deserialize(bootstrap_directory)
+        resources.cleanup()
+        
+        # Additional cleanup for launch template
+        if hasattr(resources, 'LaunchTemplateID') and resources.LaunchTemplateID:
+            ec2_client = boto3.client("ec2")
+            try:
+                ec2_client.delete_launch_template(
+                    LaunchTemplateId=resources.LaunchTemplateID
+                )
+                logging.info(f"Deleted launch template: {resources.LaunchTemplateID}")
+            except Exception as e:
+                logging.error(f"Failed to delete launch template: {e}")
+    except Exception as e:
+        logging.warning(f"Could not load or cleanup bootstrap resources: {e}")
 
 if __name__ == "__main__":
     service_cleanup()

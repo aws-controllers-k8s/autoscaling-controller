@@ -1,7 +1,32 @@
 sdk_names:
   model_name: auto-scaling
 
+resources:
+  AutoScalingGroup:
+    fields:
+      AutoScalingGroupName:
+        is_primary_key: true
+        is_immutable: true
+    tags:
+      ignore: false
+    hooks:
+      sdk_create_post_set_output:
+        template_path: hooks/auto_scaling_group/sdk_create_post_set_output.go.tpl
+      sdk_update_pre_build_request:
+        template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl
+      sdk_read_many_post_set_output:
+        template_path: hooks/auto_scaling_group/sdk_read_many_post_set_output.go.tpl
+      sdk_delete_post_build_request:
+        template_path: hooks/auto_scaling_group/sdk_delete_post_build_request.go.tpl
+      ensure_tags:
+        template_path: hooks/auto_scaling_group/ensure_tags.go.tpl
+      filter_tags:
+        template_path: hooks/auto_scaling_group/filter_tags.go.tpl
+      sync_tags:
+        template_path: hooks/auto_scaling_group/sync_tags.go.tpl
+      delta_post_compare:
+        template_path: hooks/auto_scaling_group/delta_post_compare.go.tpl
+
 ignore:
   resource_names:
-      - AutoScalingGroup
       - LaunchConfiguration
