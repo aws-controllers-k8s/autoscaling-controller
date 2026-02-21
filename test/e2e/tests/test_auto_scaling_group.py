@@ -22,6 +22,7 @@ from acktest.resources import random_suffix_name
 from acktest.k8s import resource as k8s
 from e2e import service_marker, CRD_GROUP, CRD_VERSION, load_autoscaling_resource
 from e2e.replacement_values import REPLACEMENT_VALUES
+from acktest import tags
 
 RESOURCE_PLURAL = "autoscalinggroups"
 
@@ -144,54 +145,145 @@ class TestAutoScalingGroup:
         assert asg["MinSize"] == 1
         assert asg["MaxSize"] == 5
 
-    # def test_tags(self, autoscaling_client, simple_auto_scaling_group):
-    #     """Test tag updates on AutoScalingGroup resource."""
-    #     (ref, cr) = simple_auto_scaling_group
+    def test_create_delete_tags(self, autoscaling_client, simple_auto_scaling_group):        
+        (ref, cr) = simple_auto_scaling_group
+        modify_wait_after_seconds = 5
         
-    #     # Wait for initial sync
-    #     assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+        # Wait for initial sync
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
-    #     asg_name = cr["spec"]["autoScalingGroupName"]
+        asg_name = cr["spec"]["autoScalingGroupName"]
         
-    #     # Update tags - replace existing tags with new ones
-    #     updates = {
-    #         "spec": {
-    #             "tags": [
-    #                 {
-    #                     "key": "Environment",
-    #                     "value": "test",
-    #                     "propagateAtLaunch": True
-    #                 },
-    #                 {
-    #                     "key": "ManagedBy",
-    #                     "value": "ACK",
-    #                     "propagateAtLaunch": False
-    #                 }
-    #             ]
-    #         }
-    #     }
+        # Get initial state
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        assert len(response["AutoScalingGroups"]) == 1
         
-    #     k8s.patch_custom_resource(ref, updates)
-    #     time.sleep(5)
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        assert "status" in cr
         
-    #     # Wait for the update to sync
-    #     assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=30)
         
-    #     # Verify tags in AWS
-    #     response = autoscaling_client.describe_auto_scaling_groups(
-    #         AutoScalingGroupNames=[asg_name]
-    #     )
+        # Test 1: Add new tag
+        updates = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "new-tag-key",
+                        "value": "new-tag-value-1",
+                        "propagateAtLaunch": True
+                    }
+                ]
+            }
+        }
         
-    #     asg = response["AutoScalingGroups"][0]
-    #     tags = {tag["Key"]: tag for tag in asg["Tags"]}
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
         
-    #     assert "Environment" in tags
-    #     assert tags["Environment"]["Value"] == "test"
-    #     assert tags["Environment"]["PropagateAtLaunch"] == True
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
         
-    #     assert "ManagedBy" in tags
-    #     assert tags["ManagedBy"]["Value"] == "ACK"
-    #     assert tags["ManagedBy"]["PropagateAtLaunch"] == False
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        updated_tags = {"new-tag-key": "new-tag-value-1"}
+        
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected=updated_tags,
+            actual=latest_tags,
+        )
+        
+        # Test 2: Update tag value
+        updates = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "new-tag-key",
+                        "value": "new-tag-value-2",
+                        "propagateAtLaunch": True
+                    }
+                ]
+            }
+        }
+        
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+        
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        updated_tags = {"new-tag-key": "new-tag-value-2"}
+        
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected=updated_tags,
+            actual=latest_tags,
+        )
+
+        # Test 3: Update propagateAtLaunch value
+        updates = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "new-tag-key",
+                        "value": "new-tag-value-2",
+                        "propagateAtLaunch": False
+                    }
+                ]
+            }
+        }
+        
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+        
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        
+        # Verify propagateAtLaunch was updated
+        tag_dict = {tag["Key"]: tag for tag in latest_tags}
+        assert "new-tag-key" in tag_dict
+        assert tag_dict["new-tag-key"]["Value"] == "new-tag-value-2"
+        assert tag_dict["new-tag-key"]["PropagateAtLaunch"] == False
+        
+        # Test 4: Delete all tags
+        updates = {
+            "spec": {
+                "tags": []
+            }
+        }
+        
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+        
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        updated_tags = {}
+        
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected=updated_tags,
+            actual=latest_tags,
+        )
 
     def test_delete(self, autoscaling_client):
         """Test that deleting the K8s resource deletes the AWS AutoScalingGroup."""

@@ -118,7 +118,7 @@ func (s *Syncer) SyncTags(
 		if !exists {
 			// Tag doesn't exist, add it
 			toAdd = append(toAdd, desiredTag)
-		} else if !tagEquals(desiredTag, latestTag) {
+		} else if !TagEquals(desiredTag, latestTag) {
 			// Tag exists but has different value, update it
 			toUpdate = append(toUpdate, desiredTag)
 		}
@@ -245,7 +245,7 @@ func (s *Syncer) deleteTags(
 }
 
 // tagEquals returns true if the two tags are equal
-func tagEquals(a, b *svcapitypes.Tag) bool {
+func TagEquals(a, b *svcapitypes.Tag) bool {
 	if a == nil || b == nil {
 		return a == b
 	}
