@@ -1,0 +1,23 @@
+apiVersion: autoscaling.services.k8s.aws/v1alpha1
+kind: AutoScalingGroup
+metadata:
+  name: $ASG_NAME
+spec:
+  autoScalingGroupName: $ASG_NAME
+  minSize: 1
+  maxSize: 3
+  desiredCapacity: 1
+  vpcZoneIdentifier: $VPC_ZONE_IDENTIFIER
+  launchTemplate:
+    launchTemplateID: $LAUNCH_TEMPLATE_ID
+    version: "$LAUNCH_TEMPLATE_VERSION"
+  healthCheckType: EC2
+  healthCheckGracePeriod: 300
+  defaultCooldown: 300
+  tags:
+    - key: Name
+      value: $ASG_NAME
+      propagateAtLaunch: true
+    - key: ManagedBy
+      value: ACK
+      propagateAtLaunch: false

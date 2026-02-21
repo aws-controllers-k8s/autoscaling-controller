@@ -14,5 +14,25 @@
 Auto Scaling-specific test variables.
 """
 
-REPLACEMENT_VALUES = {
-}
+from e2e.bootstrap_resources import get_bootstrap_resources
+
+def get_replacement_values():
+    """Get replacement values from bootstrap resources."""
+    try:
+        resources = get_bootstrap_resources()
+        return {
+            "LAUNCH_TEMPLATE_ID": resources.LaunchTemplateID,
+            "LAUNCH_TEMPLATE_VERSION": "$Latest",
+            "AVAILABILITY_ZONE_1": resources.AvailabilityZone1,
+            "VPC_ZONE_IDENTIFIER": resources.VPCZoneIdentifier,
+        }
+    except:
+        # Fallback values if bootstrap hasn't run
+        return {
+            "LAUNCH_TEMPLATE_ID": "",
+            "LAUNCH_TEMPLATE_VERSION": "$Latest",
+            "AVAILABILITY_ZONE_1": "us-west-2a",
+            "VPC_ZONE_IDENTIFIER": "",
+        }
+
+REPLACEMENT_VALUES = get_replacement_values()

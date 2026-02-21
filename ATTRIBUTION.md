@@ -22,7 +22,13 @@ License version 2.0, we include the full text of the package's License below.
 
 * `github.com/aws-controllers-k8s/runtime`
 * `github.com/aws/aws-sdk-go`
+* `github.com/aws/aws-sdk-go-v2`
+* `github.com/aws/aws-sdk-go-v2/service/autoscaling`
+* `github.com/aws/smithy-go`
+* `github.com/go-logr/logr`
 * `github.com/spf13/pflag`
+* `github.com/stretchr/testify`
+* `k8s.io/api`
 * `k8s.io/apimachinery`
 * `k8s.io/client-go`
 * `sigs.k8s.io/controller-runtime`
@@ -1677,6 +1683,35 @@ Subdependencies:
 #### github.com/jmespath/go-jmespath
 
 License Identifier: Apache-2.0
+
+### github.com/aws/aws-sdk-go-v2
+
+License Identifier: Apache-2.0
+
+Subdependencies:
+* `github.com/aws/smithy-go`
+
+#### github.com/aws/smithy-go
+
+License Identifier: Apache-2.0
+
+### github.com/aws/aws-sdk-go-v2/service/autoscaling
+
+License Identifier: Apache-2.0
+
+Subdependencies:
+* `github.com/aws/aws-sdk-go-v2`
+* `github.com/aws/aws-sdk-go-v2/internal/configsources`
+* `github.com/aws/aws-sdk-go-v2/internal/endpoints/v2`
+* `github.com/aws/smithy-go`
+
+
+
+
+
+
+
+
 
 
 

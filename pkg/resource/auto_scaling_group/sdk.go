@@ -1927,6 +1927,10 @@ func (rm *resourceManager) sdkDelete(
 	if err != nil {
 		return nil, err
 	}
+	// Always force delete to avoid "ScalingActivityInProgress" errors
+	// This allows deletion even when scaling activities are in progress
+	input.ForceDelete = aws.Bool(true)
+
 	var resp *svcsdk.DeleteAutoScalingGroupOutput
 	_ = resp
 	resp, err = rm.sdkapi.DeleteAutoScalingGroup(ctx, input)

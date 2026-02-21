@@ -172,6 +172,11 @@ func (s *Syncer) createTags(
 		if tagCopy.ResourceType == nil {
 			tagCopy.ResourceType = aws.String(resourceType)
 		}
+		// AWS requires PropagateAtLaunch to be set to a boolean value
+		// Default to false if not specified
+		if tagCopy.PropagateAtLaunch == nil {
+			tagCopy.PropagateAtLaunch = aws.Bool(false)
+		}
 
 		sdkTag := svcsdktypes.Tag{
 			Key:               tagCopy.Key,
