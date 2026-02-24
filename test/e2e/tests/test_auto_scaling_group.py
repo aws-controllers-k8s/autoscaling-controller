@@ -285,6 +285,83 @@ class TestAutoScalingGroup:
             actual=latest_tags,
         )
 
+    def test_tags_set_to_nil(self, autoscaling_client, simple_auto_scaling_group):
+        """Test that setting tags to nil (None) deletes all user tags from AWS."""
+        (ref, cr) = simple_auto_scaling_group
+        modify_wait_after_seconds = 5
+
+        # Wait for initial sync
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+
+        asg_name = cr["spec"]["name"]
+
+        # First, add some tags
+        updates = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "test-nil-tag-1",
+                        "value": "value-1",
+                        "propagateAtLaunch": True
+                    },
+                    {
+                        "key": "test-nil-tag-2",
+                        "value": "value-2",
+                        "propagateAtLaunch": False
+                    }
+                ]
+            }
+        }
+
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        # Verify tags were added
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        expected_tags = {
+            "test-nil-tag-1": "value-1",
+            "test-nil-tag-2": "value-2"
+        }
+
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected=expected_tags,
+            actual=latest_tags,
+        )
+
+        # Now set tags to nil (None) - this should delete all user tags
+        updates = {
+            "spec": {
+                "tags": None
+            }
+        }
+
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        # Verify all user tags were deleted (only ACK system tags should remain)
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected={},
+            actual=latest_tags,
+        )
+
     def test_delete(self, autoscaling_client):
         """Test that deleting the K8s resource deletes the AWS AutoScalingGroup."""
         resource_name = random_suffix_name("ack-test-asg-del", 32)
