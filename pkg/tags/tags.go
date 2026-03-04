@@ -15,6 +15,7 @@ package tags
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws-controllers-k8s/runtime/pkg/metrics"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
@@ -30,6 +31,37 @@ const ResourceType = "auto-scaling-group"
 
 // The default value for the PropagateAtLaunch parameter. Always set to false at initial creation/update. We later recocnile this value to match user spec
 const PropogateAtLaunchDefault = false
+
+// ValidateTagPropagateAtLaunch checks that every key in the
+// propagateAtLaunch map has a corresponding entry in the tags slice.
+// Returns an error listing the orphaned keys if any are found.
+func ValidateTagPropagateAtLaunch(
+	tags []*svcapitypes.Tag,
+	propagateAtLaunch map[string]*bool,
+) error {
+	if len(propagateAtLaunch) == 0 {
+		return nil
+	}
+	tagKeys := make(map[string]struct{}, len(tags))
+	for _, t := range tags {
+		if t.Key != nil {
+			tagKeys[*t.Key] = struct{}{}
+		}
+	}
+	var orphaned []string
+	for k := range propagateAtLaunch {
+		if _, ok := tagKeys[k]; !ok {
+			orphaned = append(orphaned, k)
+		}
+	}
+	if len(orphaned) > 0 {
+		return fmt.Errorf(
+			"tagPropagateAtLaunch contains keys not present in tags: %v",
+			orphaned,
+		)
+	}
+	return nil
+}
 
 // SyncTags merges desired and latest tags with their respective
 // PropagateAtLaunch maps, computes the created/updated/deleted diff

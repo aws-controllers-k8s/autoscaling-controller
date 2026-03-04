@@ -164,7 +164,7 @@ class TestAutoScalingGroup:
         assert cr is not None
         assert "status" in cr
         
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=30)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
         # Test 1: Add new tag
         updates = {
@@ -184,7 +184,7 @@ class TestAutoScalingGroup:
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
         
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
         response = autoscaling_client.describe_auto_scaling_groups(
             AutoScalingGroupNames=[asg_name]
@@ -227,7 +227,7 @@ class TestAutoScalingGroup:
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
         
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
         response = autoscaling_client.describe_auto_scaling_groups(
             AutoScalingGroupNames=[asg_name]
@@ -270,7 +270,7 @@ class TestAutoScalingGroup:
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
         
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
         response = autoscaling_client.describe_auto_scaling_groups(
             AutoScalingGroupNames=[asg_name]
@@ -286,14 +286,15 @@ class TestAutoScalingGroup:
         # Test 4: Delete all tags
         updates = {
             "spec": {
-                "tags": []
+                "tags": [],
+                "tagPropagateAtLaunch": None
             }
         }
         
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
         
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
         
         response = autoscaling_client.describe_auto_scaling_groups(
             AutoScalingGroupNames=[asg_name]
@@ -346,7 +347,7 @@ class TestAutoScalingGroup:
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
 
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
 
         # Verify tags were added
         response = autoscaling_client.describe_auto_scaling_groups(
@@ -378,14 +379,15 @@ class TestAutoScalingGroup:
         # Now set tags to nil (None) - this should delete all user tags
         updates = {
             "spec": {
-                "tags": None
+                "tags": None,
+                "tagPropagateAtLaunch": None
             }
         }
 
         k8s.patch_custom_resource(ref, updates)
         time.sleep(modify_wait_after_seconds)
 
-        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
 
         # Verify all user tags were deleted (only ACK system tags should remain)
         response = autoscaling_client.describe_auto_scaling_groups(
@@ -404,6 +406,107 @@ class TestAutoScalingGroup:
         # Verify k8s resource tags are nil/empty
         cr = k8s.get_resource(ref)
         assert cr["spec"].get("tags") is None or cr["spec"].get("tags") == []
+
+    def test_propagate_at_launch_for_system_tags(self, autoscaling_client, simple_auto_scaling_group):
+        """Test that a user can set propagateAtLaunch for ACK system tags
+        (services.k8s.aws/controller-version, services.k8s.aws/namespace)
+        via the tagPropagateAtLaunch map."""
+        (ref, cr) = simple_auto_scaling_group
+        modify_wait_after_seconds = 5
+
+        # Wait for initial sync
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+
+        asg_name = cr["spec"]["name"]
+
+        # Verify system tags exist with default propagateAtLaunch (false)
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        tags.assert_ack_system_tags(tags=latest_tags)
+
+        tag_dict = {tag["Key"]: tag for tag in latest_tags}
+        assert tag_dict["services.k8s.aws/controller-version"]["PropagateAtLaunch"] == False
+        assert tag_dict["services.k8s.aws/namespace"]["PropagateAtLaunch"] == False
+
+        # Set propagateAtLaunch to true for both system tags
+        updates = {
+            "spec": {
+                "tagPropagateAtLaunch": {
+                    "services.k8s.aws/controller-version": True,
+                    "services.k8s.aws/namespace": True
+                }
+            }
+        }
+
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        # Verify system tags now have propagateAtLaunch=true in AWS
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+        latest_tags = response["AutoScalingGroups"][0]["Tags"]
+        tags.assert_ack_system_tags(tags=latest_tags)
+
+        tag_dict = {tag["Key"]: tag for tag in latest_tags}
+        assert tag_dict["services.k8s.aws/controller-version"]["PropagateAtLaunch"] == True
+        assert tag_dict["services.k8s.aws/namespace"]["PropagateAtLaunch"] == True
+
+    def test_orphaned_propagate_at_launch_terminal(self, autoscaling_client, simple_auto_scaling_group):
+        """Test that specifying a key in tagPropagateAtLaunch that does not
+        exist in tags causes the resource to enter a Terminal condition."""
+        (ref, cr) = simple_auto_scaling_group
+        modify_wait_after_seconds = 5
+
+        # Wait for initial sync
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+
+        # Patch with a tagPropagateAtLaunch key that has no matching tag
+        updates = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "existing-tag",
+                        "value": "some-value",
+                    }
+                ],
+                "tagPropagateAtLaunch": {
+                    "existing-tag": True,
+                    "non-existent-tag": True
+                }
+            }
+        }
+
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+
+        # Verify the resource enters a Terminal condition
+        terminal_condition = k8s.get_resource_condition(ref, "ACK.Terminal")
+        assert terminal_condition is not None, \
+            "Expected ACK.Terminal condition to be set"
+        assert str(terminal_condition.get("status")) == "True", \
+            f"Expected ACK.Terminal status True, got {terminal_condition.get('status')}"
+        assert "non-existent-tag" in terminal_condition.get("message", ""), \
+            f"Expected error message to mention orphaned key, got: {terminal_condition.get('message')}"
+
+        # Clean up: remove the invalid tagPropagateAtLaunch to recover
+        updates = {
+            "spec": {
+                "tags": None,
+                "tagPropagateAtLaunch": None
+            }
+        }
+
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(modify_wait_after_seconds)
+
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+
 
     def test_delete(self, autoscaling_client):
         """Test that deleting the K8s resource deletes the AWS AutoScalingGroup."""

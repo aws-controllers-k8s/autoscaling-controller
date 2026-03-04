@@ -519,17 +519,6 @@ func (in *AutoScalingGroupStatus) DeepCopyInto(out *AutoScalingGroupStatus) {
 			}
 		}
 	}
-	if in.Instances != nil {
-		in, out := &in.Instances, &out.Instances
-		*out = make([]*Instance, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(Instance)
-				(*in).DeepCopyInto(*out)
-			}
-		}
-	}
 	if in.PredictedCapacity != nil {
 		in, out := &in.PredictedCapacity, &out.PredictedCapacity
 		*out = new(int64)

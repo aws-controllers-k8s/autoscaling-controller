@@ -18,3 +18,4 @@ import "github.com/aws-controllers-k8s/autoscaling-controller/pkg/tags"
 var syncTags = tags.SyncTags
 var mergeTagDescriptions = tags.MergeTagDescriptions
 var compareTagDescriptions = tags.CompareTagDescriptions
+var validateTagPropagateAtLaunch = tags.ValidateTagPropagateAtLaunch

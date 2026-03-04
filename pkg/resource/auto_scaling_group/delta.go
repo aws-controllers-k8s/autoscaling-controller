@@ -413,7 +413,6 @@ func newResourceDelta(
 	// key/value comparison alone is insufficient for ASG tags. Here we
 	// merge each side's Tags with their TagPropagateAtLaunch map and
 	// compare the full TagDescription (key + value + propagateAtLaunch).
-	// TagPropagateAtLaunch should always be nil for latest
 	desiredTagDescriptions := mergeTagDescriptions(
 		a.ko.Spec.Tags,
 		a.ko.Spec.TagPropagateAtLaunch,

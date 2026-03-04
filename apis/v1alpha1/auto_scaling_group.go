@@ -297,9 +297,6 @@ type AutoScalingGroupStatus struct {
 	// The metrics enabled for the group.
 	// +kubebuilder:validation:Optional
 	EnabledMetrics []*EnabledMetric `json:"enabledMetrics,omitempty"`
-	// The EC2 instances associated with the group.
-	// +kubebuilder:validation:Optional
-	Instances []*Instance `json:"instances,omitempty"`
 	// The predicted capacity of the group when it has a predictive scaling policy.
 	// +kubebuilder:validation:Optional
 	PredictedCapacity *int64 `json:"predictedCapacity,omitempty"`

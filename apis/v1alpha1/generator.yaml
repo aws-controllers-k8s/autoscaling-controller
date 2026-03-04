@@ -7,6 +7,13 @@ operations:
       # Always force delete to avoid "ScalingActivityInProgress" errors
       # This allows deletion even when scaling activities are in progress
       ForceDelete: aws.Bool(true)
+  DescribeAutoScalingGroups:
+    override_values:
+      # Exclude instance details from the response to avoid bloating the
+      # CR object in etcd. ASGs can have thousands of instances and each
+      # Instance entry is ~300-500 bytes. The controller doesn't need
+      # instance data for reconciliation.
+      IncludeInstances: aws.Bool(false)
 
 resources:
   AutoScalingGroup:
@@ -14,17 +21,11 @@ resources:
       Name:
         is_primary_key: true
         is_immutable: true
-      # Status fields from DescribeAutoScalingGroups output
       CreatedTime:
         is_read_only: true
         from:
           operation: DescribeAutoScalingGroups
           path: AutoScalingGroups.CreatedTime
-      Instances:
-        is_read_only: true
-        from:
-          operation: DescribeAutoScalingGroups
-          path: AutoScalingGroups.Instances
       EnabledMetrics:
         is_read_only: true
         from:
@@ -140,6 +141,8 @@ resources:
         template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl
       sdk_create_post_set_output:
         template_path: hooks/auto_scaling_group/sdk_create_post_set_output.go.tpl
+      sdk_create_pre_build_request:
+        template_path: hooks/auto_scaling_group/sdk_create_pre_build_request.go.tpl
 
 ignore:
   resource_names:
@@ -164,3 +167,7 @@ ignore:
     - TagDescription.PropagateAtLaunch
     - TagDescription.ResourceId
     - TagDescription.ResourceType
+    # Exclude Instances from the DescribeAutoScalingGroups output.
+    # Instance data is not needed for reconciliation and can bloat the
+    # CR object beyond etcd's 1.5MB limit for large ASGs.
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.Instances

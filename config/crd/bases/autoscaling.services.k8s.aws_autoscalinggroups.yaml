@@ -926,43 +926,6 @@ spec:
                       type: string
                   type: object
                 type: array
-              instances:
-                description: The EC2 instances associated with the group.
-                items:
-                  description: Describes an EC2 instance.
-                  properties:
-                    availabilityZone:
-                      type: string
-                    healthStatus:
-                      type: string
-                    imageID:
-                      type: string
-                    instanceID:
-                      type: string
-                    instanceType:
-                      type: string
-                    launchConfigurationName:
-                      type: string
-                    launchTemplate:
-                      description: |-
-                        Describes the launch template and the version of the launch template that
-                        Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information
-                        about launch templates, see Launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html)
-                        in the Amazon EC2 Auto Scaling User Guide.
-                      properties:
-                        launchTemplateID:
-                          type: string
-                        version:
-                          type: string
-                      type: object
-                    lifecycleState:
-                      type: string
-                    protectedFromScaleIn:
-                      type: boolean
-                    weightedCapacity:
-                      type: string
-                  type: object
-                type: array
               predictedCapacity:
                 description: The predicted capacity of the group when it has a predictive
                   scaling policy.

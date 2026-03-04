@@ -236,53 +236,6 @@ func (rm *resourceManager) sdkFind(
 		} else {
 			ko.Spec.InstanceMaintenancePolicy = nil
 		}
-		if elem.Instances != nil {
-			f18 := []*svcapitypes.Instance{}
-			for _, f18iter := range elem.Instances {
-				f18elem := &svcapitypes.Instance{}
-				if f18iter.AvailabilityZone != nil {
-					f18elem.AvailabilityZone = f18iter.AvailabilityZone
-				}
-				if f18iter.HealthStatus != nil {
-					f18elem.HealthStatus = f18iter.HealthStatus
-				}
-				if f18iter.ImageId != nil {
-					f18elem.ImageID = f18iter.ImageId
-				}
-				if f18iter.InstanceId != nil {
-					f18elem.InstanceID = f18iter.InstanceId
-				}
-				if f18iter.InstanceType != nil {
-					f18elem.InstanceType = f18iter.InstanceType
-				}
-				if f18iter.LaunchConfigurationName != nil {
-					f18elem.LaunchConfigurationName = f18iter.LaunchConfigurationName
-				}
-				if f18iter.LaunchTemplate != nil {
-					f18elemf6 := &svcapitypes.LaunchTemplateSpecification{}
-					if f18iter.LaunchTemplate.LaunchTemplateId != nil {
-						f18elemf6.LaunchTemplateID = f18iter.LaunchTemplate.LaunchTemplateId
-					}
-					if f18iter.LaunchTemplate.Version != nil {
-						f18elemf6.Version = f18iter.LaunchTemplate.Version
-					}
-					f18elem.LaunchTemplate = f18elemf6
-				}
-				if f18iter.LifecycleState != "" {
-					f18elem.LifecycleState = aws.String(string(f18iter.LifecycleState))
-				}
-				if f18iter.ProtectedFromScaleIn != nil {
-					f18elem.ProtectedFromScaleIn = f18iter.ProtectedFromScaleIn
-				}
-				if f18iter.WeightedCapacity != nil {
-					f18elem.WeightedCapacity = f18iter.WeightedCapacity
-				}
-				f18 = append(f18, f18elem)
-			}
-			ko.Status.Instances = f18
-		} else {
-			ko.Status.Instances = nil
-		}
 		if elem.LaunchConfigurationName != nil {
 			ko.Spec.LaunchConfigurationName = elem.LaunchConfigurationName
 		} else {
@@ -779,6 +732,7 @@ func (rm *resourceManager) newListRequestPayload(
 		f0 = append(f0, *r.ko.Spec.Name)
 		res.AutoScalingGroupNames = f0
 	}
+	res.IncludeInstances = aws.Bool(false)
 
 	return res, nil
 }
@@ -795,6 +749,9 @@ func (rm *resourceManager) sdkCreate(
 	defer func() {
 		exit(err)
 	}()
+	if err := validateTagPropagateAtLaunch(desired.ko.Spec.Tags, desired.ko.Spec.TagPropagateAtLaunch); err != nil {
+		return nil, ackerr.NewTerminalError(err)
+	}
 	input, err := rm.newCreateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
@@ -1418,6 +1375,10 @@ func (rm *resourceManager) sdkUpdate(
 	defer func() {
 		exit(err)
 	}()
+	if err := validateTagPropagateAtLaunch(desired.ko.Spec.Tags, desired.ko.Spec.TagPropagateAtLaunch); err != nil {
+		return nil, ackerr.NewTerminalError(err)
+	}
+
 	desired.SetStatus(latest)
 
 	if delta.DifferentAt("Spec.Tags") {
