@@ -56,23 +56,12 @@ resources:
         from:
           operation: DescribeAutoScalingGroups
           path: AutoScalingGroups.WarmPoolSize
-      # Custom field mapping tag key to PropagateAtLaunch value.
-      # The autoscaling CreateOrUpdateTags API supports PropagateAtLaunch per tag,
-      # but we strip it from the Tag shape for cleaner CRD UX. This map lets users
-      # control which tags propagate to EC2 instances launched by the ASG.
-      # Keys should match tag keys in spec.tags; values are booleans.
-      TagPropagateAtLaunch:
-        type: "map[string]*bool"
-        compare:
-          is_ignored: true
       # Ignore tags in create operation - tags are synced separately
       # via the CreateOrUpdateTags/DeleteTags APIs in the syncTags hook
       Tags:
         set:
           - method: Create
             ignore: "to"
-        compare:
-          is_ignored: true
       # Fix type_ -> type for TrafficSources
       TrafficSources.Type:
         go_tag: json:"type,omitempty"
@@ -133,16 +122,10 @@ resources:
     tags:
       ignore: false
     hooks:
-      delta_post_compare:
-        template_path: hooks/auto_scaling_group/delta_post_compare.go.tpl
-      sdk_read_many_post_set_output:
-        template_path: hooks/auto_scaling_group/sdk_read_many_post_set_output.go.tpl
       sdk_update_pre_build_request:
         template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl
       sdk_create_post_set_output:
         template_path: hooks/auto_scaling_group/sdk_create_post_set_output.go.tpl
-      sdk_create_pre_build_request:
-        template_path: hooks/auto_scaling_group/sdk_create_pre_build_request.go.tpl
 
 ignore:
   resource_names:

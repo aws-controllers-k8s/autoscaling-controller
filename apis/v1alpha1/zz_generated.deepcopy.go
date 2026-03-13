@@ -397,22 +397,6 @@ func (in *AutoScalingGroupSpec) DeepCopyInto(out *AutoScalingGroupSpec) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.TagPropagateAtLaunch != nil {
-		in, out := &in.TagPropagateAtLaunch, &out.TagPropagateAtLaunch
-		*out = make(map[string]*bool, len(*in))
-		for key, val := range *in {
-			var outVal *bool
-			if val == nil {
-				(*out)[key] = nil
-			} else {
-				inVal := (*in)[key]
-				in, out := &inVal, &outVal
-				*out = new(bool)
-				**out = **in
-			}
-			(*out)[key] = outVal
-		}
-	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
 		*out = make([]*Tag, len(*in))

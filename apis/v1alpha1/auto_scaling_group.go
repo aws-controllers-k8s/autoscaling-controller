@@ -229,13 +229,6 @@ type AutoScalingGroupSpec struct {
 	// specify true. For more information, see Auto Scaling group zonal shift (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-zonal-shift.html)
 	// in the Amazon EC2 Auto Scaling User Guide.
 	SkipZonalShiftValidation *bool `json:"skipZonalShiftValidation,omitempty"`
-	// A map of tag keys to boolean values that controls whether each tag is
-	// propagated to EC2 instances launched by the Auto Scaling group. If a tag
-	// key is present in this map with a value of true, the corresponding tag
-	// from spec.tags will be propagated to new instances. If false or absent,
-	// the tag will not be propagated. Keys in this map should match keys
-	// defined in spec.tags.
-	TagPropagateAtLaunch map[string]*bool `json:"tagPropagateAtLaunch,omitempty"`
 	// One or more tags. You can tag your Auto Scaling group and propagate the tags
 	// to the Amazon EC2 instances it launches. Tags are not propagated to Amazon
 	// EBS volumes. To add tags to Amazon EBS volumes, specify the tags in a launch

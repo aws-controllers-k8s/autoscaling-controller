@@ -687,26 +687,6 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	rm.setStatusDefaults(ko)
-	// Build the TagPropagateAtLaunch map from the raw API response.
-	// DescribeAutoScalingGroups returns TagDescription objects with
-	// PropagateAtLaunch, but the generated code only copies Key/Value
-	// into Spec.Tags. This hook extracts PropagateAtLaunch into the
-	// separate TagPropagateAtLaunch map so delta comparison is accurate.
-	for _, asg := range resp.AutoScalingGroups {
-		if asg.AutoScalingGroupName != nil && ko.Spec.Name != nil && *asg.AutoScalingGroupName == *ko.Spec.Name {
-			if len(asg.Tags) > 0 {
-				palMap := make(map[string]*bool, len(asg.Tags))
-				for _, t := range asg.Tags {
-					if t.Key != nil && t.PropagateAtLaunch != nil {
-						palMap[*t.Key] = t.PropagateAtLaunch
-					}
-				}
-				ko.Spec.TagPropagateAtLaunch = palMap
-			}
-			break
-		}
-	}
-
 	return &resource{ko}, nil
 }
 
@@ -749,9 +729,6 @@ func (rm *resourceManager) sdkCreate(
 	defer func() {
 		exit(err)
 	}()
-	if err := validateTagPropagateAtLaunch(desired.ko.Spec.Tags, desired.ko.Spec.TagPropagateAtLaunch); err != nil {
-		return nil, ackerr.NewTerminalError(err)
-	}
 	input, err := rm.newCreateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
@@ -1375,32 +1352,22 @@ func (rm *resourceManager) sdkUpdate(
 	defer func() {
 		exit(err)
 	}()
-	if err := validateTagPropagateAtLaunch(desired.ko.Spec.Tags, desired.ko.Spec.TagPropagateAtLaunch); err != nil {
-		return nil, ackerr.NewTerminalError(err)
-	}
-
-	desired.SetStatus(latest)
-
+	updatedDesired := desired.DeepCopy()
+	updatedDesired.SetStatus(latest)
 	if delta.DifferentAt("Spec.Tags") {
 		name := string(*latest.ko.Spec.Name)
 		err = syncTags(
 			ctx,
-			desired.ko.Spec.Tags,
-			desired.ko.Spec.TagPropagateAtLaunch,
-			latest.ko.Spec.Tags,
-			latest.ko.Spec.TagPropagateAtLaunch,
-			name,
-			rm.sdkapi,
-			rm.metrics,
+			desired.ko.Spec.Tags, latest.ko.Spec.Tags,
+			&name, convertToOrderedACKTags, rm.sdkapi, rm.metrics,
 		)
 		if err != nil {
-			return desired, err
+			return nil, err
 		}
 	}
 	if !delta.DifferentExcept("Spec.Tags") {
-		return desired, nil
+		return rm.concreteResource(updatedDesired), nil
 	}
-
 	input, err := rm.newUpdateRequestPayload(ctx, desired, delta)
 	if err != nil {
 		return nil, err

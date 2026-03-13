@@ -15,10 +15,11 @@ package tags
 
 import (
 	"context"
-	"fmt"
 
+	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	"github.com/aws-controllers-k8s/runtime/pkg/metrics"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
+	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	svcsdk "github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -32,48 +33,15 @@ const ResourceType = "auto-scaling-group"
 // The default value for the PropagateAtLaunch parameter. Always set to false at initial creation/update. We later recocnile this value to match user spec
 const PropogateAtLaunchDefault = false
 
-// ValidateTagPropagateAtLaunch checks that every key in the
-// propagateAtLaunch map has a corresponding entry in the tags slice.
-// Returns an error listing the orphaned keys if any are found.
-func ValidateTagPropagateAtLaunch(
-	tags []*svcapitypes.Tag,
-	propagateAtLaunch map[string]*bool,
-) error {
-	if len(propagateAtLaunch) == 0 {
-		return nil
-	}
-	tagKeys := make(map[string]struct{}, len(tags))
-	for _, t := range tags {
-		if t.Key != nil {
-			tagKeys[*t.Key] = struct{}{}
-		}
-	}
-	var orphaned []string
-	for k := range propagateAtLaunch {
-		if _, ok := tagKeys[k]; !ok {
-			orphaned = append(orphaned, k)
-		}
-	}
-	if len(orphaned) > 0 {
-		return fmt.Errorf(
-			"tagPropagateAtLaunch contains keys not present in tags: %v",
-			orphaned,
-		)
-	}
-	return nil
-}
-
-// SyncTags merges desired and latest tags with their respective
-// PropagateAtLaunch maps, computes the created/updated/deleted diff
-// using CompareTagDescriptions, and applies the changes via
-// CreateOrUpdateTags and DeleteTags.
-func SyncTags(
+// Tags examines the Tags in the supplied Resource and calls the
+// TagResource and UntagResource APIs to ensure that the set of
+// associated Tags stays in sync with the Resource.Spec.Tags
+func Tags(
 	ctx context.Context,
 	desiredTags []*svcapitypes.Tag,
-	desiredPropagateAtLaunch map[string]*bool,
 	latestTags []*svcapitypes.Tag,
-	latestPropagateAtLaunch map[string]*bool,
-	resourceID string,
+	resourceID *string,
+	toACKTags func([]*svcapitypes.Tag) (acktags.Tags, []string),
 	sdkapi *svcsdk.Client,
 	metrics *metrics.Metrics,
 ) (err error) {
@@ -81,49 +49,45 @@ func SyncTags(
 	exit := rlog.Trace("syncTags")
 	defer func() { exit(err) }()
 
-	desiredTagDescriptions := MergeTagDescriptions(
-		desiredTags,
-		desiredPropagateAtLaunch,
-		resourceID,
-	)
-	latestTagDescriptions := MergeTagDescriptions(
-		latestTags,
-		latestPropagateAtLaunch,
-		resourceID,
-	)
+	from, _ := toACKTags(latestTags)
+	to, _ := toACKTags(desiredTags)
 
-	created, updated, deleted := CompareTagDescriptions(desiredTagDescriptions, latestTagDescriptions)
+	added, _, removed := ackcompare.GetTagsDifference(from, to)
 
-	// 4. CreateOrUpdateTags for created + updated
-	toUpsert := append(created, updated...)
-	if len(toUpsert) > 0 {
-		toAdd := make([]svcsdktypes.Tag, 0, len(toUpsert))
-		for _, td := range toUpsert {
+	for key := range removed {
+		if _, ok := added[key]; ok {
+			delete(removed, key)
+		}
+	}
+
+	if len(added) > 0 {
+		toAdd := make([]svcsdktypes.Tag, 0, len(added))
+		for key, val := range added {
+			key, val := key, val
 			toAdd = append(toAdd, svcsdktypes.Tag{
-				Key:               td.Key,
-				Value:             td.Value,
-				ResourceId:        aws.String(resourceID),
+				Key:               &key,
+				Value:             &val,
+				ResourceId:        resourceID,
 				ResourceType:      aws.String(ResourceType),
-				PropagateAtLaunch: td.PropagateAtLaunch,
+				PropagateAtLaunch: aws.Bool(PropogateAtLaunchDefault),
 			})
 		}
-		rlog.Debug("creating/updating tags on group", "count", len(toAdd))
+		rlog.Debug("adding tags to work group", "tags", added)
 		_, err = sdkapi.CreateOrUpdateTags(ctx, &svcsdk.CreateOrUpdateTagsInput{
 			Tags: toAdd,
 		})
-		metrics.RecordAPICall("UPDATE", "CreateOrUpdateTags", err)
+		metrics.RecordAPICall("UPDATE", "AddTagsToResource", err)
 		if err != nil {
 			return err
 		}
 	}
 
-	// 5. DeleteTags for deleted
-	if len(deleted) > 0 {
-		toRemove := make([]svcsdktypes.Tag, 0, len(deleted))
-		for _, td := range deleted {
+	if len(removed) > 0 {
+		toRemove := make([]svcsdktypes.Tag, 0, len(removed))
+		for key := range removed {
 			toRemove = append(toRemove, svcsdktypes.Tag{
-				Key:          td.Key,
-				ResourceId:   aws.String(resourceID),
+				Key:          &key,
+				ResourceId:   resourceID,
 				ResourceType: aws.String(ResourceType),
 			})
 		}
@@ -140,12 +104,12 @@ func SyncTags(
 	return nil
 }
 
-func GetTags(ctx context.Context, resourceID string, sdkapi *svcsdk.Client, metrics *metrics.Metrics) ([]svcsdktypes.TagDescription, error) {
+func GetTags(ctx context.Context, resourceID string, sdkapi *svcsdk.Client, metrics *metrics.Metrics) ([]*svcapitypes.Tag, error) {
 
 	input := &svcsdk.DescribeTagsInput{
 		Filters: []svcsdktypes.Filter{
 			{
-				Name:   aws.String("auto-scaling-group"),
+				Name:   aws.String(ResourceType),
 				Values: []string{resourceID},
 			},
 		},
@@ -155,92 +119,14 @@ func GetTags(ctx context.Context, resourceID string, sdkapi *svcsdk.Client, metr
 	if err != nil {
 		return nil, err
 	}
-	return resp.Tags, nil
+	return convertTags(resp.Tags), nil
 }
 
-// MergeTagDescriptions builds a []svcsdktypes.TagDescription from the
-// spec tags and the TagPropagateAtLaunch map. Each desired tag is
-// converted to a TagDescription with ResourceId, ResourceType, and
-// PropagateAtLaunch set. If a tag key exists in propagateAtLaunch, that
-// value is used; otherwise PropagateAtLaunch defaults to false.
-func MergeTagDescriptions(
-	tags []*svcapitypes.Tag,
-	propagateAtLaunch map[string]*bool,
-	resourceID string,
-) []svcsdktypes.TagDescription {
-	result := make([]svcsdktypes.TagDescription, 0, len(tags))
+func convertTags(tags []svcsdktypes.TagDescription) []*svcapitypes.Tag {
+	resp := make([]*svcapitypes.Tag, 0, len(tags))
 	for _, t := range tags {
-		if t.Key == nil {
-			continue
-		}
-		td := svcsdktypes.TagDescription{
-			Key:               t.Key,
-			ResourceId:        aws.String(resourceID),
-			ResourceType:      aws.String(ResourceType),
-			PropagateAtLaunch: aws.Bool(PropogateAtLaunchDefault),
-		}
-		if t.Value != nil {
-			td.Value = t.Value
-		}
-		if propagateAtLaunch != nil {
-			if v, ok := propagateAtLaunch[*t.Key]; ok && v != nil {
-				td.PropagateAtLaunch = v
-			}
-		}
-		result = append(result, td)
-	}
-	return result
-}
-
-// CompareTagDescriptions compares desired vs latest TagDescription slices and
-// returns three slices:
-//   - created: tags present in desired but not in latest (new tags)
-//   - updated: tags present in both but with different value or PropagateAtLaunch
-//   - deleted: tags present in latest but not in desired (removed tags)
-//
-// Comparison is order-independent and keyed on the tag Key field.
-// ResourceId and ResourceType are not compared since they are always
-// the same for a given ASG.
-func CompareTagDescriptions(
-	desired, latest []svcsdktypes.TagDescription,
-) (created, updated, deleted []svcsdktypes.TagDescription) {
-	type tagInfo struct {
-		Value             string
-		PropagateAtLaunch bool
-		Original          svcsdktypes.TagDescription
+		resp = append(resp, &svcapitypes.Tag{Key: t.Key, Value: t.Value})
 	}
 
-	latestMap := make(map[string]tagInfo, len(latest))
-	for _, t := range latest {
-		key := aws.ToString(t.Key)
-		latestMap[key] = tagInfo{
-			Value:             aws.ToString(t.Value),
-			PropagateAtLaunch: aws.ToBool(t.PropagateAtLaunch),
-			Original:          t,
-		}
-	}
-
-	desiredKeys := make(map[string]struct{}, len(desired))
-	for _, t := range desired {
-		key := aws.ToString(t.Key)
-		desiredKeys[key] = struct{}{}
-
-		li, exists := latestMap[key]
-		if !exists {
-			created = append(created, t)
-			continue
-		}
-		if aws.ToString(t.Value) != li.Value || aws.ToBool(t.PropagateAtLaunch) != li.PropagateAtLaunch {
-			updated = append(updated, t)
-		}
-	}
-
-	for _, t := range latest {
-		key := aws.ToString(t.Key)
-		if _, exists := desiredKeys[key]; !exists {
-			deleted = append(deleted, t)
-		}
-	}
-
-	return created, updated, deleted
+	return resp
 }
