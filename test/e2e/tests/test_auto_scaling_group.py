@@ -59,6 +59,40 @@ def simple_auto_scaling_group():
     except:
         pass
 
+@pytest.fixture(scope="module")
+def auto_scaling_group_with_tags():
+    resource_name = random_suffix_name("ack-test-asg-tags", 32)
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements["ASG_NAME"] = resource_name
+
+    resource_data = load_autoscaling_resource(
+        "auto_scaling_group_tags",
+        additional_replacements=replacements,
+    )
+    logging.debug(resource_data)
+
+    # Create the k8s resource
+    ref = k8s.CustomResourceReference(
+        CRD_GROUP, CRD_VERSION, RESOURCE_PLURAL,
+        resource_name, namespace="default",
+    )
+    k8s.create_custom_resource(ref, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(ref)
+
+    assert cr is not None
+    assert k8s.get_resource_exists(ref)
+
+    yield (ref, cr)
+
+    # Teardown
+    try:
+        _, deleted = k8s.delete_custom_resource(ref, 3, 10)
+        assert deleted
+    except:
+        pass
+
+
 
 @service_marker
 @pytest.mark.canary
@@ -84,6 +118,53 @@ class TestAutoScalingGroup:
         assert asg["MinSize"] == cr["spec"]["minSize"]
         assert asg["MaxSize"] == cr["spec"]["maxSize"]
         assert asg["DesiredCapacity"] == cr["spec"].get("desiredCapacity", cr["spec"]["minSize"])
+
+    def test_create_with_tags(self, autoscaling_client, auto_scaling_group_with_tags):
+        """Test that tags specified at creation time are correctly applied to the ASG."""
+        (ref, cr) = auto_scaling_group_with_tags
+
+        # Wait for the resource to be synced
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=5)
+
+        asg_name = cr["spec"]["name"]
+
+        # Verify the resource exists in AWS
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[asg_name]
+        )
+
+        assert len(response["AutoScalingGroups"]) == 1
+        asg = response["AutoScalingGroups"][0]
+
+        # Verify basic properties
+        assert asg["AutoScalingGroupName"] == asg_name
+        assert asg["MinSize"] == 1
+        assert asg["MaxSize"] == 2
+
+        # Verify tags were applied during initial create
+        latest_tags = asg["Tags"]
+        expected_tags = {
+            "environment": "testing",
+            "team": "ack-dev",
+        }
+
+        tags.assert_ack_system_tags(
+            tags=latest_tags,
+        )
+        tags.assert_equal_without_ack_tags(
+            expected=expected_tags,
+            actual=latest_tags,
+        )
+
+        # Verify k8s resource spec tags match (without system tags)
+        cr = k8s.get_resource(ref)
+        tags.assert_equal(
+            expected=expected_tags,
+            actual=cr["spec"]["tags"],
+            key_member_name='key',
+            value_member_name='value'
+        )
+
 
     def test_update_capacity(self, autoscaling_client, simple_auto_scaling_group):
         (ref, cr) = simple_auto_scaling_group
@@ -363,6 +444,58 @@ class TestAutoScalingGroup:
         # Verify k8s resource tags are nil/empty
         cr = k8s.get_resource(ref)
         assert cr["spec"].get("tags") is None or cr["spec"].get("tags") == []
+
+    def test_validation_error_terminal(self, autoscaling_client):
+        """Test that a ValidationError from the AWS API results in a terminal condition.
+
+        Creates an AutoScalingGroup with minSize > maxSize, which triggers a
+        ValidationError from the AutoScaling API. The controller should mark
+        the resource with a terminal condition rather than retrying.
+        """
+        resource_name = random_suffix_name("ack-test-asg-inv", 32)
+
+        replacements = REPLACEMENT_VALUES.copy()
+        replacements["ASG_NAME"] = resource_name
+
+        resource_data = load_autoscaling_resource(
+            "auto_scaling_group_invalid",
+            additional_replacements=replacements,
+        )
+
+        # Create the k8s resource with invalid config (minSize > maxSize)
+        ref = k8s.CustomResourceReference(
+            CRD_GROUP, CRD_VERSION, RESOURCE_PLURAL,
+            resource_name, namespace="default",
+        )
+        k8s.create_custom_resource(ref, resource_data)
+        cr = k8s.wait_resource_consumed_by_controller(ref)
+
+        assert cr is not None
+
+        # The controller should set the Terminal condition to True
+        assert k8s.wait_on_condition(ref, "ACK.Terminal", "True", wait_periods=5)
+
+        # Verify the terminal condition message references ValidationError
+        cr = k8s.get_resource(ref)
+        terminal_condition = None
+        for condition in cr["status"].get("conditions", []):
+            if condition["type"] == "ACK.Terminal":
+                terminal_condition = condition
+                break
+
+        assert terminal_condition is not None
+        assert terminal_condition["status"] == "True"
+        assert "ValidationError" in terminal_condition.get("message", "")
+
+        # Verify the ASG was NOT created in AWS
+        response = autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[resource_name]
+        )
+        assert len(response["AutoScalingGroups"]) == 0
+
+        # Cleanup
+        _, deleted = k8s.delete_custom_resource(ref, 3, 10)
+        assert deleted
 
     def test_delete(self, autoscaling_client):
         """Test that deleting the K8s resource deletes the AWS AutoScalingGroup."""

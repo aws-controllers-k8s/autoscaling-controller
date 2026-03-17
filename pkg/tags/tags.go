@@ -30,8 +30,8 @@ import (
 // The type of resource. The only supported value is auto-scaling-group
 const ResourceType = "auto-scaling-group"
 
-// The default value for the PropagateAtLaunch parameter. Always set to false at initial creation/update. We later recocnile this value to match user spec
-const PropogateAtLaunchDefault = false
+// The default value for the PropagateAtLaunch parameter. User cannot define this value in spec, thus we default the value to false for now.
+const PropagateAtLaunchDefault = false
 
 // Tags examines the Tags in the supplied Resource and calls the
 // TagResource and UntagResource APIs to ensure that the set of
@@ -63,20 +63,19 @@ func Tags(
 	if len(added) > 0 {
 		toAdd := make([]svcsdktypes.Tag, 0, len(added))
 		for key, val := range added {
-			key, val := key, val
 			toAdd = append(toAdd, svcsdktypes.Tag{
 				Key:               &key,
 				Value:             &val,
 				ResourceId:        resourceID,
 				ResourceType:      aws.String(ResourceType),
-				PropagateAtLaunch: aws.Bool(PropogateAtLaunchDefault),
+				PropagateAtLaunch: aws.Bool(PropagateAtLaunchDefault),
 			})
 		}
-		rlog.Debug("adding tags to work group", "tags", added)
+		rlog.Debug("adding tags to auto-scaling group", "tags", added)
 		_, err = sdkapi.CreateOrUpdateTags(ctx, &svcsdk.CreateOrUpdateTagsInput{
 			Tags: toAdd,
 		})
-		metrics.RecordAPICall("UPDATE", "AddTagsToResource", err)
+		metrics.RecordAPICall("UPDATE", "CreateOrUpdateTags", err)
 		if err != nil {
 			return err
 		}
@@ -91,7 +90,7 @@ func Tags(
 				ResourceType: aws.String(ResourceType),
 			})
 		}
-		rlog.Debug("removing tags from group", "count", len(toRemove))
+		rlog.Debug("removing tags from auto-scaling group", "count", len(toRemove))
 		_, err = sdkapi.DeleteTags(ctx, &svcsdk.DeleteTagsInput{
 			Tags: toRemove,
 		})
@@ -102,24 +101,6 @@ func Tags(
 	}
 
 	return nil
-}
-
-func GetTags(ctx context.Context, resourceID string, sdkapi *svcsdk.Client, metrics *metrics.Metrics) ([]*svcapitypes.Tag, error) {
-
-	input := &svcsdk.DescribeTagsInput{
-		Filters: []svcsdktypes.Filter{
-			{
-				Name:   aws.String(ResourceType),
-				Values: []string{resourceID},
-			},
-		},
-	}
-
-	resp, err := sdkapi.DescribeTags(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-	return convertTags(resp.Tags), nil
 }
 
 func convertTags(tags []svcsdktypes.TagDescription) []*svcapitypes.Tag {

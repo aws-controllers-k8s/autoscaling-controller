@@ -1312,6 +1312,20 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.SkipZonalShiftValidation != nil {
 		res.SkipZonalShiftValidation = r.ko.Spec.SkipZonalShiftValidation
 	}
+	if r.ko.Spec.Tags != nil {
+		f27 := []svcsdktypes.Tag{}
+		for _, f27iter := range r.ko.Spec.Tags {
+			f27elem := &svcsdktypes.Tag{}
+			if f27iter.Key != nil {
+				f27elem.Key = f27iter.Key
+			}
+			if f27iter.Value != nil {
+				f27elem.Value = f27iter.Value
+			}
+			f27 = append(f27, *f27elem)
+		}
+		res.Tags = f27
+	}
 	if r.ko.Spec.TargetGroupARNs != nil {
 		res.TargetGroupARNs = aws.ToStringSlice(r.ko.Spec.TargetGroupARNs)
 	}
@@ -2054,6 +2068,18 @@ func (rm *resourceManager) updateConditions(
 // and if the exception indicates that it is a Terminal exception
 // 'Terminal' exception are specified in generator configuration
 func (rm *resourceManager) terminalAWSError(err error) bool {
-	// No terminal_errors specified for this resource in generator config
-	return false
+	if err == nil {
+		return false
+	}
+
+	var terminalErr smithy.APIError
+	if !errors.As(err, &terminalErr) {
+		return false
+	}
+	switch terminalErr.ErrorCode() {
+	case "ValidationError":
+		return true
+	default:
+		return false
+	}
 }

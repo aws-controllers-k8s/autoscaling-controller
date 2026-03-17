@@ -56,12 +56,6 @@ resources:
         from:
           operation: DescribeAutoScalingGroups
           path: AutoScalingGroups.WarmPoolSize
-      # Ignore tags in create operation - tags are synced separately
-      # via the CreateOrUpdateTags/DeleteTags APIs in the syncTags hook
-      Tags:
-        set:
-          - method: Create
-            ignore: "to"
       # Fix type_ -> type for TrafficSources
       TrafficSources.Type:
         go_tag: json:"type,omitempty"
@@ -103,6 +97,9 @@ resources:
           resource: TargetGroup
           service_name: elbv2
           path: Status.ACKResourceMetadata.ARN
+    exceptions:
+      terminal_codes:
+        - ValidationError
     renames:
       operations:
         CreateAutoScalingGroup:
