@@ -21,7 +21,10 @@ from e2e import bootstrap_directory
 
 @dataclass
 class BootstrapResources(Resources):
-    pass
+    LaunchTemplateID: str = None
+    LaunchTemplateName: str = None
+    AvailabilityZone1: str = None
+    VPCZoneIdentifier: str = None
 
 _bootstrap_resources = None
 

@@ -16,6 +16,7 @@ rules:
 - apiGroups:
   - autoscaling.services.k8s.aws
   resources:
+  - autoscalinggroups
   verbs:
   - get
   - list

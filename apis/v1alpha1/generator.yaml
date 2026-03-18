@@ -1,7 +1,153 @@
 sdk_names:
   model_name: auto-scaling
 
+operations:
+  DeleteAutoScalingGroup:
+    override_values:
+      # Always force delete to avoid "ScalingActivityInProgress" errors
+      # This allows deletion even when scaling activities are in progress
+      ForceDelete: aws.Bool(true)
+  DescribeAutoScalingGroups:
+    override_values:
+      # Exclude instance details from the response to avoid bloating the
+      # CR object in etcd. ASGs can have thousands of instances and each
+      # Instance entry is ~300-500 bytes. The controller doesn't need
+      # instance data for reconciliation.
+      IncludeInstances: aws.Bool(false)
+
+resources:
+  AutoScalingGroup:
+    fields:
+      Name:
+        is_primary_key: true
+        is_immutable: true
+      CreatedTime:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.CreatedTime
+      EnabledMetrics:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.EnabledMetrics
+      SuspendedProcesses:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.SuspendedProcesses
+      Status:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.Status
+      PredictedCapacity:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.PredictedCapacity
+      WarmPoolConfiguration:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.WarmPoolConfiguration
+      WarmPoolSize:
+        is_read_only: true
+        from:
+          operation: DescribeAutoScalingGroups
+          path: AutoScalingGroups.WarmPoolSize
+      # Fix type_ -> type for TrafficSources
+      TrafficSources.Type:
+        go_tag: json:"type,omitempty"
+      # Cross-resource reference to EC2 Instance
+      InstanceID:
+        references:
+          resource: Instance
+          service_name: ec2
+          path: Status.InstanceID
+      # Cross-resource reference to IAM ServiceLinkedRole
+      ServiceLinkedRoleARN:
+        references:
+          resource: ServiceLinkedRole
+          service_name: iam
+          path: Status.ACKResourceMetadata.ARN
+      # Cross-resource reference to IAM Role for lifecycle hooks
+      LifecycleHookSpecificationList.RoleARN:
+        references:
+          resource: Role
+          service_name: iam
+          path: Status.ACKResourceMetadata.ARN
+      # TODO: Enable LaunchTemplate references once known issue with code generator is fixed
+      # bug is discussed in PR https://github.com/aws-controllers-k8s/autoscaling-controller/pull/3
+      # # Cross-resource reference to EC2 LaunchTemplate
+      # LaunchTemplate.LaunchTemplateID:
+      #   references:
+      #     resource: LaunchTemplate
+      #     service_name: ec2
+      #     path: Status.ID
+      # # Cross-resource reference for MixedInstancesPolicy LaunchTemplate
+      # MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateID:
+      #   references:
+      #     resource: LaunchTemplate
+      #     service_name: ec2
+      #     path: Status.ID
+      # Cross-resource reference to ELBv2 TargetGroups
+      TargetGroupARNs:
+        references:
+          resource: TargetGroup
+          service_name: elbv2
+          path: Status.ACKResourceMetadata.ARN
+    exceptions:
+      terminal_codes:
+        - ValidationError
+        - AlreadyExists
+        - LimitExceeded
+    renames:
+      operations:
+        CreateAutoScalingGroup:
+          input_fields:
+            AutoScalingGroupName: Name
+        UpdateAutoScalingGroup:
+          input_fields:
+            AutoScalingGroupName: Name
+        DeleteAutoScalingGroup:
+          input_fields:
+            AutoScalingGroupName: Name
+        DescribeAutoScalingGroups:
+          input_fields:
+            AutoScalingGroupNames: Names
+          output_fields:
+            AutoScalingGroupName: Name
+    hooks:
+      sdk_update_pre_build_request:
+        template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl
+      sdk_create_post_set_output:
+        template_path: hooks/auto_scaling_group/sdk_create_post_set_output.go.tpl
+
 ignore:
   resource_names:
-      - AutoScalingGroup
-      - LaunchConfiguration
+    - LaunchConfiguration
+  field_paths:
+    # remove reserved field
+    - CreateAutoScalingGroupInput.Context
+    # Ignore LaunchTemplateId to avoid ID vs Name conflict.
+    # AWS returns both fields in responses even when only one is specified.
+    # Supporting only LaunchTemplateName avoids reconciliation drift issues and the need for custom code
+    - CreateAutoScalingGroupInput.LaunchTemplate.LaunchTemplateId
+    - UpdateAutoScalingGroupInput.LaunchTemplate.LaunchTemplateId
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.LaunchTemplate.LaunchTemplateId
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateId
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.MixedInstancesPolicy.LaunchTemplate.Overrides.LaunchTemplateSpecification.LaunchTemplateId
+    # Only keep Key and Value for tags - remove PropagateAtLaunch, ResourceId, ResourceType
+    # Target the shared Tag and TagDescription shapes directly so fields are
+    # removed from both the generated Go types and the CRD schema
+    - Tag.PropagateAtLaunch
+    - Tag.ResourceId
+    - Tag.ResourceType
+    - TagDescription.PropagateAtLaunch
+    - TagDescription.ResourceId
+    - TagDescription.ResourceType
+    # Exclude Instances from the DescribeAutoScalingGroups output.
+    # Instance data is not needed for reconciliation and can bloat the
+    # CR object beyond etcd's 1.5MB limit for large ASGs.
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.Instances

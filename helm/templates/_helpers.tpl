@@ -70,6 +70,52 @@ rules:
   - list
   - watch
 - apiGroups:
+  - autoscaling.services.k8s.aws
+  resources:
+  - autoscalinggroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling.services.k8s.aws
+  resources:
+  - autoscalinggroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ec2.services.k8s.aws
+  resources:
+  - instances
+  - instances/status
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - elbv2.services.k8s.aws
+  resources:
+  - targetgroups
+  - targetgroups/status
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - iam.services.k8s.aws
+  resources:
+  - roles
+  - roles/status
+  - servicelinkedroles
+  - servicelinkedroles/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - services.k8s.aws
   resources:
   - fieldexports
