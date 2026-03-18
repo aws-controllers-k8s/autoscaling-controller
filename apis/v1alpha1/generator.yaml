@@ -65,10 +65,10 @@ resources:
           resource: Instance
           service_name: ec2
           path: Status.InstanceID
-      # Cross-resource reference to IAM Role for service-linked role
+      # Cross-resource reference to IAM ServiceLinkedRole
       ServiceLinkedRoleARN:
         references:
-          resource: Role
+          resource: ServiceLinkedRole
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
       # Cross-resource reference to IAM Role for lifecycle hooks
@@ -116,8 +116,6 @@ resources:
             AutoScalingGroupNames: Names
           output_fields:
             AutoScalingGroupName: Name
-    tags:
-      ignore: false
     hooks:
       sdk_update_pre_build_request:
         template_path: hooks/auto_scaling_group/sdk_update_pre_build_request.go.tpl

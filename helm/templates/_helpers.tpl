@@ -110,6 +110,8 @@ rules:
   resources:
   - roles
   - roles/status
+  - servicelinkedroles
+  - servicelinkedroles/status
   verbs:
   - get
   - list

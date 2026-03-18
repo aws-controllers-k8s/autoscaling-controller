@@ -39,8 +39,8 @@ import (
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
 
-// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
-// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=servicelinkedroles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=servicelinkedroles/status,verbs=get;list
 
 // +kubebuilder:rbac:groups=elbv2.services.k8s.aws,resources=targetgroups,verbs=get;list
 // +kubebuilder:rbac:groups=elbv2.services.k8s.aws,resources=targetgroups/status,verbs=get;list
@@ -327,14 +327,68 @@ func (rm *resourceManager) resolveReferenceForServiceLinkedRoleARN(
 		if arr.Namespace != nil && *arr.Namespace != "" {
 			namespace = *arr.Namespace
 		}
-		obj := &iamapitypes.Role{}
-		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+		obj := &iamapitypes.ServiceLinkedRole{}
+		if err := getReferencedResourceState_ServiceLinkedRole(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
 			return hasReferences, err
 		}
 		ko.Spec.ServiceLinkedRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
 	}
 
 	return hasReferences, nil
+}
+
+// getReferencedResourceState_ServiceLinkedRole looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_ServiceLinkedRole(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *iamapitypes.ServiceLinkedRole,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"ServiceLinkedRole",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"ServiceLinkedRole",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"ServiceLinkedRole",
+			namespace, name)
+	}
+	if obj.Status.ACKResourceMetadata == nil || obj.Status.ACKResourceMetadata.ARN == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"ServiceLinkedRole",
+			namespace, name,
+			"Status.ACKResourceMetadata.ARN")
+	}
+	return nil
 }
 
 // resolveReferenceForTargetGroupARNs reads the resource referenced
