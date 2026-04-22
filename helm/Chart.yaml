@@ -1,8 +1,8 @@
 apiVersion: v1
 name: autoscaling-chart
 description: A Helm chart for the ACK service controller for Amazon EC2 Auto Scaling (AutoScaling)
-version: 0.1.0
-appVersion: 0.1.0
+version: 0.1.1
+appVersion: 0.1.1
 home: https://github.com/aws-controllers-k8s/autoscaling-controller
 icon: https://raw.githubusercontent.com/aws/eks-charts/master/docs/logo/aws.png
 sources:
