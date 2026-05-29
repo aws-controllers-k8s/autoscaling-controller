@@ -3,6 +3,8 @@
 This repository contains source code for the AWS Controllers for Kubernetes
 (ACK) service controller for Amazon EC2 Auto Scaling.
 
+
+<!-- test: validate prow-v2 presubmit triggers -->
 Please [log issues][ack-issues] and feedback on the main AWS Controllers for
 Kubernetes Github project.
 
