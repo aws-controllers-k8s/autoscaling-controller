@@ -71,6 +71,8 @@ resources:
           resource: ServiceLinkedRole
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
+      LifecycleHookSpecificationList.NotificationMetadata:
+        is_document: true
       # Cross-resource reference to IAM Role for lifecycle hooks
       LifecycleHookSpecificationList.RoleARN:
         references:

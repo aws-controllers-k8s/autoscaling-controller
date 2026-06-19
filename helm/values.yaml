@@ -4,7 +4,7 @@
 
 image:
   repository: public.ecr.aws/aws-controllers-k8s/autoscaling-controller
-  tag: 0.2.0
+  tag: 0.0.0-non-release-version
   pullPolicy: IfNotPresent
   pullSecrets: []
 
