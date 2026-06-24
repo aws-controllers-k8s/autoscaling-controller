@@ -275,6 +275,11 @@ func (in *AutoScalingGroupSpec) DeepCopyInto(out *AutoScalingGroupSpec) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.DeletionProtection != nil {
+		in, out := &in.DeletionProtection, &out.DeletionProtection
+		*out = new(string)
+		**out = **in
+	}
 	if in.DesiredCapacity != nil {
 		in, out := &in.DesiredCapacity, &out.DesiredCapacity
 		*out = new(int64)
@@ -936,6 +941,11 @@ func (in *Group) DeepCopyInto(out *Group) {
 	if in.DefaultInstanceWarmup != nil {
 		in, out := &in.DefaultInstanceWarmup, &out.DefaultInstanceWarmup
 		*out = new(int64)
+		**out = **in
+	}
+	if in.DeletionProtection != nil {
+		in, out := &in.DeletionProtection, &out.DeletionProtection
+		*out = new(string)
 		**out = **in
 	}
 	if in.DesiredCapacity != nil {

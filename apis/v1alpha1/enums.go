@@ -85,6 +85,14 @@ const (
 	CapacityReservationPreference_none                        CapacityReservationPreference = "none"
 )
 
+type DeletionProtection string
+
+const (
+	DeletionProtection_none                   DeletionProtection = "none"
+	DeletionProtection_prevent_all_deletion   DeletionProtection = "prevent-all-deletion"
+	DeletionProtection_prevent_force_deletion DeletionProtection = "prevent-force-deletion"
+)
+
 type ImpairedZoneHealthCheckBehavior string
 
 const (

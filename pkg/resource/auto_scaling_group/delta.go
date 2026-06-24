@@ -128,6 +128,13 @@ func newResourceDelta(
 			delta.Add("Spec.DefaultInstanceWarmup", a.ko.Spec.DefaultInstanceWarmup, b.ko.Spec.DefaultInstanceWarmup)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.DeletionProtection, b.ko.Spec.DeletionProtection) {
+		delta.Add("Spec.DeletionProtection", a.ko.Spec.DeletionProtection, b.ko.Spec.DeletionProtection)
+	} else if a.ko.Spec.DeletionProtection != nil && b.ko.Spec.DeletionProtection != nil {
+		if *a.ko.Spec.DeletionProtection != *b.ko.Spec.DeletionProtection {
+			delta.Add("Spec.DeletionProtection", a.ko.Spec.DeletionProtection, b.ko.Spec.DeletionProtection)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DesiredCapacity, b.ko.Spec.DesiredCapacity) {
 		delta.Add("Spec.DesiredCapacity", a.ko.Spec.DesiredCapacity, b.ko.Spec.DesiredCapacity)
 	} else if a.ko.Spec.DesiredCapacity != nil && b.ko.Spec.DesiredCapacity != nil {

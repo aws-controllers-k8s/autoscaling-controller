@@ -73,6 +73,17 @@ type AutoScalingGroupSpec struct {
 	//
 	// Default: None
 	DefaultInstanceWarmup *int64 `json:"defaultInstanceWarmup,omitempty"`
+	// The deletion protection setting for the Auto Scaling group. This setting
+	// helps safeguard your Auto Scaling group and its instances by controlling
+	// whether the DeleteAutoScalingGroup operation is allowed. When deletion protection
+	// is enabled, users cannot delete the Auto Scaling group according to the specified
+	// protection level until the setting is changed back to a less restrictive
+	// level.
+	//
+	// The valid values are none, prevent-force-deletion, and prevent-all-deletion.
+	//
+	// Default: none
+	DeletionProtection *string `json:"deletionProtection,omitempty"`
 	// The desired capacity is the initial capacity of the Auto Scaling group at
 	// the time of its creation and the capacity it attempts to maintain. It can
 	// scale beyond this capacity if you configure auto scaling. This number must
@@ -127,7 +138,11 @@ type AutoScalingGroupSpec struct {
 	// The instance lifecycle policy for the Auto Scaling group. This policy controls
 	// instance behavior when an instance transitions through its lifecycle states.
 	// Configure retention triggers to specify when instances should move to a Retained
-	// state for manual intervention instead of automatic termination.
+	// state instead of automatic termination.
+	//
+	// For more information, see Control instance retention with instance lifecycle
+	// policies (https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-lifecycle-policy.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
 	//
 	// Instances in a Retained state will continue to incur standard EC2 charges
 	// until terminated.
@@ -284,22 +299,23 @@ type AutoScalingGroupStatus struct {
 	// resource
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
-	// The date and time the group was created.
+	// The date and time the Auto Scaling group was created.
 	// +kubebuilder:validation:Optional
 	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
-	// The metrics enabled for the group.
+	// The metrics enabled for the Auto Scaling group.
 	// +kubebuilder:validation:Optional
 	EnabledMetrics []*EnabledMetric `json:"enabledMetrics,omitempty"`
 	// The predicted capacity of the group when it has a predictive scaling policy.
 	// +kubebuilder:validation:Optional
 	PredictedCapacity *int64 `json:"predictedCapacity,omitempty"`
-	// The current state of the group when the DeleteAutoScalingGroup (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DeleteAutoScalingGroup.html)
+	// The current state of the Auto Scaling group when the DeleteAutoScalingGroup
+	// (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DeleteAutoScalingGroup.html)
 	// operation is in progress.
 	//
 	// Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
 	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty"`
-	// The suspended processes associated with the group.
+	// The suspended processes associated with the Auto Scaling group.
 	// +kubebuilder:validation:Optional
 	SuspendedProcesses []*SuspendedProcess `json:"suspendedProcesses,omitempty"`
 	// The warm pool for the group.

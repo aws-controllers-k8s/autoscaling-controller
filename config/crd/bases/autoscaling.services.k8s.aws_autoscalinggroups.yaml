@@ -131,6 +131,19 @@ spec:
                   Default: None
                 format: int64
                 type: integer
+              deletionProtection:
+                description: |-
+                  The deletion protection setting for the Auto Scaling group. This setting
+                  helps safeguard your Auto Scaling group and its instances by controlling
+                  whether the DeleteAutoScalingGroup operation is allowed. When deletion protection
+                  is enabled, users cannot delete the Auto Scaling group according to the specified
+                  protection level until the setting is changed back to a less restrictive
+                  level.
+
+                  The valid values are none, prevent-force-deletion, and prevent-all-deletion.
+
+                  Default: none
+                type: string
               desiredCapacity:
                 description: |-
                   The desired capacity is the initial capacity of the Auto Scaling group at
@@ -199,7 +212,11 @@ spec:
                   The instance lifecycle policy for the Auto Scaling group. This policy controls
                   instance behavior when an instance transitions through its lifecycle states.
                   Configure retention triggers to specify when instances should move to a Retained
-                  state for manual intervention instead of automatic termination.
+                  state instead of automatic termination.
+
+                  For more information, see Control instance retention with instance lifecycle
+                  policies (https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-lifecycle-policy.html)
+                  in the Amazon EC2 Auto Scaling User Guide.
 
                   Instances in a Retained state will continue to incur standard EC2 charges
                   until terminated.
@@ -905,11 +922,11 @@ spec:
                   type: object
                 type: array
               createdTime:
-                description: The date and time the group was created.
+                description: The date and time the Auto Scaling group was created.
                 format: date-time
                 type: string
               enabledMetrics:
-                description: The metrics enabled for the group.
+                description: The metrics enabled for the Auto Scaling group.
                 items:
                   description: Describes an enabled Auto Scaling group metric.
                   properties:
@@ -926,13 +943,15 @@ spec:
                 type: integer
               status:
                 description: |-
-                  The current state of the group when the DeleteAutoScalingGroup (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DeleteAutoScalingGroup.html)
+                  The current state of the Auto Scaling group when the DeleteAutoScalingGroup
+                  (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DeleteAutoScalingGroup.html)
                   operation is in progress.
 
                   Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
                 type: string
               suspendedProcesses:
-                description: The suspended processes associated with the group.
+                description: The suspended processes associated with the Auto Scaling
+                  group.
                 items:
                   description: |-
                     Describes an auto scaling process that has been suspended.
