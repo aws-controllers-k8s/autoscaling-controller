@@ -17,6 +17,8 @@ package auto_scaling_group
 
 import (
 	"bytes"
+	"sort"
+	"strings"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
@@ -40,6 +42,21 @@ func newResourceDelta(
 		(a != nil && b == nil) {
 		delta.Add("", a, b)
 		return delta
+	}
+	// Normalize VPCZoneIdentifier on both sides before comparison.
+	// AWS returns subnet IDs in a different order than submitted, causing
+	// a false positive diff on every reconciliation.
+	if a.ko.Spec.VPCZoneIdentifier != nil && *a.ko.Spec.VPCZoneIdentifier != "" {
+		subnetsA := strings.Split(*a.ko.Spec.VPCZoneIdentifier, ",")
+		sort.Strings(subnetsA)
+		sortedA := strings.Join(subnetsA, ",")
+		a.ko.Spec.VPCZoneIdentifier = &sortedA
+	}
+	if b.ko.Spec.VPCZoneIdentifier != nil && *b.ko.Spec.VPCZoneIdentifier != "" {
+		subnetsB := strings.Split(*b.ko.Spec.VPCZoneIdentifier, ",")
+		sort.Strings(subnetsB)
+		sortedB := strings.Join(subnetsB, ",")
+		b.ko.Spec.VPCZoneIdentifier = &sortedB
 	}
 
 	if ackcompare.HasNilDifference(a.ko.Spec.AvailabilityZoneDistribution, b.ko.Spec.AvailabilityZoneDistribution) {

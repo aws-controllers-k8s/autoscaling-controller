@@ -50,7 +50,7 @@ var (
 // +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups/status,verbs=get;update;patch
 
-var lateInitializeFieldNames = []string{}
+var lateInitializeFieldNames = []string{"AvailabilityZoneDistribution", "AvailabilityZones", "CapacityReservationSpecification", "InstanceLifecyclePolicy", "NewInstancesProtectedFromScaleIn", "ServiceLinkedRoleARN", "TerminationPolicies"}
 
 // resourceManager is responsible for providing a consistent way to perform
 // CRUD operations in a backend AWS service API for Book custom resources.
@@ -260,7 +260,30 @@ func (rm *resourceManager) lateInitializeFromReadOneOutput(
 	observed acktypes.AWSResource,
 	latest acktypes.AWSResource,
 ) acktypes.AWSResource {
-	return latest
+	observedKo := rm.concreteResource(observed).ko.DeepCopy()
+	latestKo := rm.concreteResource(latest).ko.DeepCopy()
+	if observedKo.Spec.AvailabilityZoneDistribution != nil && latestKo.Spec.AvailabilityZoneDistribution == nil {
+		latestKo.Spec.AvailabilityZoneDistribution = observedKo.Spec.AvailabilityZoneDistribution
+	}
+	if observedKo.Spec.AvailabilityZones != nil && latestKo.Spec.AvailabilityZones == nil {
+		latestKo.Spec.AvailabilityZones = observedKo.Spec.AvailabilityZones
+	}
+	if observedKo.Spec.CapacityReservationSpecification != nil && latestKo.Spec.CapacityReservationSpecification == nil {
+		latestKo.Spec.CapacityReservationSpecification = observedKo.Spec.CapacityReservationSpecification
+	}
+	if observedKo.Spec.InstanceLifecyclePolicy != nil && latestKo.Spec.InstanceLifecyclePolicy == nil {
+		latestKo.Spec.InstanceLifecyclePolicy = observedKo.Spec.InstanceLifecyclePolicy
+	}
+	if observedKo.Spec.NewInstancesProtectedFromScaleIn != nil && latestKo.Spec.NewInstancesProtectedFromScaleIn == nil {
+		latestKo.Spec.NewInstancesProtectedFromScaleIn = observedKo.Spec.NewInstancesProtectedFromScaleIn
+	}
+	if observedKo.Spec.ServiceLinkedRoleARN != nil && latestKo.Spec.ServiceLinkedRoleARN == nil {
+		latestKo.Spec.ServiceLinkedRoleARN = observedKo.Spec.ServiceLinkedRoleARN
+	}
+	if observedKo.Spec.TerminationPolicies != nil && latestKo.Spec.TerminationPolicies == nil {
+		latestKo.Spec.TerminationPolicies = observedKo.Spec.TerminationPolicies
+	}
+	return &resource{latestKo}
 }
 
 // IsSynced returns true if the resource is synced.

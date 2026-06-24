@@ -203,15 +203,20 @@ type Group struct {
 	CreatedTime                      *metav1.Time                      `json:"createdTime,omitempty"`
 	DefaultCooldown                  *int64                            `json:"defaultCooldown,omitempty"`
 	DefaultInstanceWarmup            *int64                            `json:"defaultInstanceWarmup,omitempty"`
+	DeletionProtection               *string                           `json:"deletionProtection,omitempty"`
 	DesiredCapacity                  *int64                            `json:"desiredCapacity,omitempty"`
 	DesiredCapacityType              *string                           `json:"desiredCapacityType,omitempty"`
 	EnabledMetrics                   []*EnabledMetric                  `json:"enabledMetrics,omitempty"`
 	HealthCheckGracePeriod           *int64                            `json:"healthCheckGracePeriod,omitempty"`
 	HealthCheckType                  *string                           `json:"healthCheckType,omitempty"`
-	// Defines the lifecycle policy for instances in an Auto Scaling group. This
-	// policy controls instance behavior when lifecycles transition and operations
-	// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
-	// or applications requiring extended draining periods.
+	// The instance lifecycle policy for the Auto Scaling group. This policy controls
+	// instance behavior when an instance transitions through its lifecycle states.
+	// Configure retention triggers to specify when instances should move to a Retained
+	// state instead of automatic termination.
+	//
+	// For more information, see Control instance retention with instance lifecycle
+	// policies (https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-lifecycle-policy.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
 	InstanceLifecyclePolicy *InstanceLifecyclePolicy `json:"instanceLifecyclePolicy,omitempty"`
 	// Describes an instance maintenance policy.
 	//
@@ -300,10 +305,14 @@ type InstanceDetails struct {
 	WeightedCapacity     *string                      `json:"weightedCapacity,omitempty"`
 }
 
-// Defines the lifecycle policy for instances in an Auto Scaling group. This
-// policy controls instance behavior when lifecycles transition and operations
-// fail. Use lifecycle policies to ensure graceful shutdown for stateful workloads
-// or applications requiring extended draining periods.
+// The instance lifecycle policy for the Auto Scaling group. This policy controls
+// instance behavior when an instance transitions through its lifecycle states.
+// Configure retention triggers to specify when instances should move to a Retained
+// state instead of automatic termination.
+//
+// For more information, see Control instance retention with instance lifecycle
+// policies (https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-lifecycle-policy.html)
+// in the Amazon EC2 Auto Scaling User Guide.
 type InstanceLifecyclePolicy struct {
 	// Defines the specific triggers that cause instances to be retained in a Retained
 	// state rather than terminated. Each trigger corresponds to a different failure
