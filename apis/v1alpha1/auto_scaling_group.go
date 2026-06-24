@@ -73,17 +73,6 @@ type AutoScalingGroupSpec struct {
 	//
 	// Default: None
 	DefaultInstanceWarmup *int64 `json:"defaultInstanceWarmup,omitempty"`
-	// The deletion protection setting for the Auto Scaling group. This setting
-	// helps safeguard your Auto Scaling group and its instances by controlling
-	// whether the DeleteAutoScalingGroup operation is allowed. When deletion protection
-	// is enabled, users cannot delete the Auto Scaling group according to the specified
-	// protection level until the setting is changed back to a less restrictive
-	// level.
-	//
-	// The valid values are none, prevent-force-deletion, and prevent-all-deletion.
-	//
-	// Default: none
-	DeletionProtection *string `json:"deletionProtection,omitempty"`
 	// The desired capacity is the initial capacity of the Auto Scaling group at
 	// the time of its creation and the capacity it attempts to maintain. It can
 	// scale beyond this capacity if you configure auto scaling. This number must

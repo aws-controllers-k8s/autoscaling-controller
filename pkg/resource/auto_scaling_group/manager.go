@@ -251,28 +251,6 @@ func (rm *resourceManager) LateInitialize(
 func (rm *resourceManager) incompleteLateInitialization(
 	res acktypes.AWSResource,
 ) bool {
-	ko := rm.concreteResource(res).ko.DeepCopy()
-	if ko.Spec.AvailabilityZoneDistribution == nil {
-		return true
-	}
-	if ko.Spec.AvailabilityZones == nil {
-		return true
-	}
-	if ko.Spec.CapacityReservationSpecification == nil {
-		return true
-	}
-	if ko.Spec.InstanceLifecyclePolicy == nil {
-		return true
-	}
-	if ko.Spec.NewInstancesProtectedFromScaleIn == nil {
-		return true
-	}
-	if ko.Spec.ServiceLinkedRoleARN == nil {
-		return true
-	}
-	if ko.Spec.TerminationPolicies == nil {
-		return true
-	}
 	return false
 }
 

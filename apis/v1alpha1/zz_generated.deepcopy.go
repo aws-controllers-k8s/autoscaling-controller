@@ -275,11 +275,6 @@ func (in *AutoScalingGroupSpec) DeepCopyInto(out *AutoScalingGroupSpec) {
 		*out = new(int64)
 		**out = **in
 	}
-	if in.DeletionProtection != nil {
-		in, out := &in.DeletionProtection, &out.DeletionProtection
-		*out = new(string)
-		**out = **in
-	}
 	if in.DesiredCapacity != nil {
 		in, out := &in.DesiredCapacity, &out.DesiredCapacity
 		*out = new(int64)

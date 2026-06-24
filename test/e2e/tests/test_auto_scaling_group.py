@@ -119,6 +119,41 @@ class TestAutoScalingGroup:
         assert asg["MaxSize"] == cr["spec"]["maxSize"]
         assert asg["DesiredCapacity"] == cr["spec"].get("desiredCapacity", cr["spec"]["minSize"])
 
+    def test_no_reconciliation_churn(self, simple_auto_scaling_group):
+        """Test that the controller does not perform unnecessary updates after sync.
+
+        After a resource reaches ResourceSynced=True, the controller should not
+        continuously re-reconcile due to server-side defaults causing spurious
+        diffs. This verifies that metadata.generation remains stable, indicating
+        no unwanted spec updates are being applied by the controller.
+        """
+        (ref, _) = simple_auto_scaling_group
+
+        # Ensure the resource is synced first
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=5)
+
+        # Record the generation after initial sync
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        initial_generation = cr["metadata"]["generation"]
+
+        # Wait two reconciliation cycles (~60s) and check generation is stable
+        time.sleep(60)
+
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        current_generation = cr["metadata"]["generation"]
+
+        assert current_generation == initial_generation, (
+            f"ASG generation changed from {initial_generation} to "
+            f"{current_generation} without user changes, indicating the "
+            f"controller is performing unnecessary updates (likely due to "
+            f"server-side default fields causing delta churn)"
+        )
+
+        # Confirm the resource is still synced
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=1)
+
     def test_create_with_tags(self, autoscaling_client, auto_scaling_group_with_tags):
         """Test that tags specified at creation time are correctly applied to the ASG."""
         (ref, cr) = auto_scaling_group_with_tags

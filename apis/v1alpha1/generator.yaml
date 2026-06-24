@@ -21,45 +21,26 @@ resources:
       Name:
         is_primary_key: true
         is_immutable: true
-      # --- Late-initialized fields ---
-      # These fields have server-side defaults assigned by the AWS Auto Scaling
-      # API when not explicitly set by the user. Without late_initialize, the
-      # controller sees a perpetual diff (desired=nil vs latest=<default>) on
-      # every reconciliation, causing an infinite update loop where
-      # ResourceSynced never reaches True.
-      #
-      # Evidence from soak test controller logs showing the recurring delta:
-      #   {"Path":"Spec.AvailabilityZoneDistribution","A":null,"B":{"capacityDistributionStrategy":"balanced-best-effort"}}
-      #   {"Path":"Spec.AvailabilityZones","A":null,"B":["us-west-2a","us-west-2b","us-west-2c","us-west-2d"]}
-      #   {"Path":"Spec.CapacityReservationSpecification","A":null,"B":{"capacityReservationPreference":"default"}}
-      #   {"Path":"Spec.InstanceLifecyclePolicy","A":null,"B":{"retentionTriggers":{"terminateHookAbandon":"terminate"}}}
-      #   {"Path":"Spec.NewInstancesProtectedFromScaleIn","A":null,"B":false}
-      #   {"Path":"Spec.ServiceLinkedRoleARN","A":null,"B":"arn:aws:iam::...:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"}
-      #   {"Path":"Spec.TerminationPolicies","A":null,"B":["Default"]}
+      # Late-initialized fields: AWS assigns server-side defaults to these
+      # when not set by the user, causing perpetual reconciliation churn.
       AvailabilityZoneDistribution:
-        # Default: {"capacityDistributionStrategy": "balanced-best-effort"}
-        # AWS assigns a distribution strategy when subnets span multiple AZs.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       AvailabilityZones:
-        # Default: derived from the VPCZoneIdentifier subnets (e.g. ["us-west-2a","us-west-2b","us-west-2c","us-west-2d"])
-        # AWS populates this from the subnets provided in VPCZoneIdentifier.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       CapacityReservationSpecification:
-        # Default: {"capacityReservationPreference": "default"}
-        # AWS assigns the default capacity reservation preference.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       InstanceLifecyclePolicy:
-        # Default: {"retentionTriggers": {"terminateHookAbandon": "terminate"}}
-        # AWS assigns a default lifecycle policy for instance termination hooks.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       NewInstancesProtectedFromScaleIn:
-        # Default: false
-        # AWS explicitly returns this boolean even when not set by the user.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       TerminationPolicies:
-        # Default: ["Default"]
-        # AWS assigns the "Default" termination policy when none is specified.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
       CreatedTime:
         is_read_only: true
         from:
@@ -106,9 +87,8 @@ resources:
           path: Status.InstanceID
       # Cross-resource reference to IAM ServiceLinkedRole
       ServiceLinkedRoleARN:
-        # Default: "arn:aws:iam::<account>:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
-        # AWS assigns the default Auto Scaling service-linked role when none is specified.
-        late_initialize: {}
+        late_initialize:
+          skip_incomplete_check: {}
         references:
           resource: ServiceLinkedRole
           service_name: iam
@@ -172,6 +152,10 @@ ignore:
   field_paths:
     # remove reserved field
     - CreateAutoScalingGroupInput.Context
+    # DeletionProtection is a new SDK field not yet supported by this controller
+    - CreateAutoScalingGroupInput.DeletionProtection
+    - UpdateAutoScalingGroupInput.DeletionProtection
+    - DescribeAutoScalingGroupsOutput.AutoScalingGroups.DeletionProtection
     # Ignore LaunchTemplateId to avoid ID vs Name conflict.
     # AWS returns both fields in responses even when only one is specified.
     # Supporting only LaunchTemplateName avoids reconciliation drift issues and the need for custom code

@@ -171,11 +171,6 @@ func (rm *resourceManager) sdkFind(
 		} else {
 			ko.Spec.DefaultInstanceWarmup = nil
 		}
-		if elem.DeletionProtection != "" {
-			ko.Spec.DeletionProtection = aws.String(string(elem.DeletionProtection))
-		} else {
-			ko.Spec.DeletionProtection = nil
-		}
 		if elem.DesiredCapacity != nil {
 			desiredCapacityCopy := int64(*elem.DesiredCapacity)
 			ko.Spec.DesiredCapacity = &desiredCapacityCopy
@@ -824,9 +819,6 @@ func (rm *resourceManager) newCreateRequestPayload(
 		defaultInstanceWarmupCopy := int32(defaultInstanceWarmupCopy0)
 		res.DefaultInstanceWarmup = &defaultInstanceWarmupCopy
 	}
-	if r.ko.Spec.DeletionProtection != nil {
-		res.DeletionProtection = svcsdktypes.DeletionProtection(*r.ko.Spec.DeletionProtection)
-	}
 	if r.ko.Spec.DesiredCapacity != nil {
 		desiredCapacityCopy0 := *r.ko.Spec.DesiredCapacity
 		if desiredCapacityCopy0 > math.MaxInt32 || desiredCapacityCopy0 < math.MinInt32 {
@@ -853,25 +845,25 @@ func (rm *resourceManager) newCreateRequestPayload(
 		res.InstanceId = r.ko.Spec.InstanceID
 	}
 	if r.ko.Spec.InstanceLifecyclePolicy != nil {
-		f14 := &svcsdktypes.InstanceLifecyclePolicy{}
+		f13 := &svcsdktypes.InstanceLifecyclePolicy{}
 		if r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers != nil {
-			f14f0 := &svcsdktypes.RetentionTriggers{}
+			f13f0 := &svcsdktypes.RetentionTriggers{}
 			if r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon != nil {
-				f14f0.TerminateHookAbandon = svcsdktypes.RetentionAction(*r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
+				f13f0.TerminateHookAbandon = svcsdktypes.RetentionAction(*r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
 			}
-			f14.RetentionTriggers = f14f0
+			f13.RetentionTriggers = f13f0
 		}
-		res.InstanceLifecyclePolicy = f14
+		res.InstanceLifecyclePolicy = f13
 	}
 	if r.ko.Spec.InstanceMaintenancePolicy != nil {
-		f15 := &svcsdktypes.InstanceMaintenancePolicy{}
+		f14 := &svcsdktypes.InstanceMaintenancePolicy{}
 		if r.ko.Spec.InstanceMaintenancePolicy.MaxHealthyPercentage != nil {
 			maxHealthyPercentageCopy0 := *r.ko.Spec.InstanceMaintenancePolicy.MaxHealthyPercentage
 			if maxHealthyPercentageCopy0 > math.MaxInt32 || maxHealthyPercentageCopy0 < math.MinInt32 {
 				return nil, fmt.Errorf("error: field MaxHealthyPercentage is of type int32")
 			}
 			maxHealthyPercentageCopy := int32(maxHealthyPercentageCopy0)
-			f15.MaxHealthyPercentage = &maxHealthyPercentageCopy
+			f14.MaxHealthyPercentage = &maxHealthyPercentageCopy
 		}
 		if r.ko.Spec.InstanceMaintenancePolicy.MinHealthyPercentage != nil {
 			minHealthyPercentageCopy0 := *r.ko.Spec.InstanceMaintenancePolicy.MinHealthyPercentage
@@ -879,56 +871,56 @@ func (rm *resourceManager) newCreateRequestPayload(
 				return nil, fmt.Errorf("error: field MinHealthyPercentage is of type int32")
 			}
 			minHealthyPercentageCopy := int32(minHealthyPercentageCopy0)
-			f15.MinHealthyPercentage = &minHealthyPercentageCopy
+			f14.MinHealthyPercentage = &minHealthyPercentageCopy
 		}
-		res.InstanceMaintenancePolicy = f15
+		res.InstanceMaintenancePolicy = f14
 	}
 	if r.ko.Spec.LaunchConfigurationName != nil {
 		res.LaunchConfigurationName = r.ko.Spec.LaunchConfigurationName
 	}
 	if r.ko.Spec.LaunchTemplate != nil {
-		f17 := &svcsdktypes.LaunchTemplateSpecification{}
+		f16 := &svcsdktypes.LaunchTemplateSpecification{}
 		if r.ko.Spec.LaunchTemplate.LaunchTemplateName != nil {
-			f17.LaunchTemplateName = r.ko.Spec.LaunchTemplate.LaunchTemplateName
+			f16.LaunchTemplateName = r.ko.Spec.LaunchTemplate.LaunchTemplateName
 		}
 		if r.ko.Spec.LaunchTemplate.Version != nil {
-			f17.Version = r.ko.Spec.LaunchTemplate.Version
+			f16.Version = r.ko.Spec.LaunchTemplate.Version
 		}
-		res.LaunchTemplate = f17
+		res.LaunchTemplate = f16
 	}
 	if r.ko.Spec.LifecycleHookSpecificationList != nil {
-		f18 := []svcsdktypes.LifecycleHookSpecification{}
-		for _, f18iter := range r.ko.Spec.LifecycleHookSpecificationList {
-			f18elem := &svcsdktypes.LifecycleHookSpecification{}
-			if f18iter.DefaultResult != nil {
-				f18elem.DefaultResult = f18iter.DefaultResult
+		f17 := []svcsdktypes.LifecycleHookSpecification{}
+		for _, f17iter := range r.ko.Spec.LifecycleHookSpecificationList {
+			f17elem := &svcsdktypes.LifecycleHookSpecification{}
+			if f17iter.DefaultResult != nil {
+				f17elem.DefaultResult = f17iter.DefaultResult
 			}
-			if f18iter.HeartbeatTimeout != nil {
-				heartbeatTimeoutCopy0 := *f18iter.HeartbeatTimeout
+			if f17iter.HeartbeatTimeout != nil {
+				heartbeatTimeoutCopy0 := *f17iter.HeartbeatTimeout
 				if heartbeatTimeoutCopy0 > math.MaxInt32 || heartbeatTimeoutCopy0 < math.MinInt32 {
 					return nil, fmt.Errorf("error: field HeartbeatTimeout is of type int32")
 				}
 				heartbeatTimeoutCopy := int32(heartbeatTimeoutCopy0)
-				f18elem.HeartbeatTimeout = &heartbeatTimeoutCopy
+				f17elem.HeartbeatTimeout = &heartbeatTimeoutCopy
 			}
-			if f18iter.LifecycleHookName != nil {
-				f18elem.LifecycleHookName = f18iter.LifecycleHookName
+			if f17iter.LifecycleHookName != nil {
+				f17elem.LifecycleHookName = f17iter.LifecycleHookName
 			}
-			if f18iter.LifecycleTransition != nil {
-				f18elem.LifecycleTransition = f18iter.LifecycleTransition
+			if f17iter.LifecycleTransition != nil {
+				f17elem.LifecycleTransition = f17iter.LifecycleTransition
 			}
-			if f18iter.NotificationMetadata != nil {
-				f18elem.NotificationMetadata = f18iter.NotificationMetadata
+			if f17iter.NotificationMetadata != nil {
+				f17elem.NotificationMetadata = f17iter.NotificationMetadata
 			}
-			if f18iter.NotificationTargetARN != nil {
-				f18elem.NotificationTargetARN = f18iter.NotificationTargetARN
+			if f17iter.NotificationTargetARN != nil {
+				f17elem.NotificationTargetARN = f17iter.NotificationTargetARN
 			}
-			if f18iter.RoleARN != nil {
-				f18elem.RoleARN = f18iter.RoleARN
+			if f17iter.RoleARN != nil {
+				f17elem.RoleARN = f17iter.RoleARN
 			}
-			f18 = append(f18, *f18elem)
+			f17 = append(f17, *f17elem)
 		}
-		res.LifecycleHookSpecificationList = f18
+		res.LifecycleHookSpecificationList = f17
 	}
 	if r.ko.Spec.LoadBalancerNames != nil {
 		res.LoadBalancerNames = aws.ToStringSlice(r.ko.Spec.LoadBalancerNames)
@@ -958,11 +950,11 @@ func (rm *resourceManager) newCreateRequestPayload(
 		res.MinSize = &minSizeCopy
 	}
 	if r.ko.Spec.MixedInstancesPolicy != nil {
-		f23 := &svcsdktypes.MixedInstancesPolicy{}
+		f22 := &svcsdktypes.MixedInstancesPolicy{}
 		if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution != nil {
-			f23f0 := &svcsdktypes.InstancesDistribution{}
+			f22f0 := &svcsdktypes.InstancesDistribution{}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy != nil {
-				f23f0.OnDemandAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy
+				f22f0.OnDemandAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity != nil {
 				onDemandBaseCapacityCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity
@@ -970,7 +962,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 					return nil, fmt.Errorf("error: field OnDemandBaseCapacity is of type int32")
 				}
 				onDemandBaseCapacityCopy := int32(onDemandBaseCapacityCopy0)
-				f23f0.OnDemandBaseCapacity = &onDemandBaseCapacityCopy
+				f22f0.OnDemandBaseCapacity = &onDemandBaseCapacityCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandPercentageAboveBaseCapacity != nil {
 				onDemandPercentageAboveBaseCapacityCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandPercentageAboveBaseCapacity
@@ -978,10 +970,10 @@ func (rm *resourceManager) newCreateRequestPayload(
 					return nil, fmt.Errorf("error: field OnDemandPercentageAboveBaseCapacity is of type int32")
 				}
 				onDemandPercentageAboveBaseCapacityCopy := int32(onDemandPercentageAboveBaseCapacityCopy0)
-				f23f0.OnDemandPercentageAboveBaseCapacity = &onDemandPercentageAboveBaseCapacityCopy
+				f22f0.OnDemandPercentageAboveBaseCapacity = &onDemandPercentageAboveBaseCapacityCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy != nil {
-				f23f0.SpotAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy
+				f22f0.SpotAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotInstancePools != nil {
 				spotInstancePoolsCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotInstancePools
@@ -989,324 +981,324 @@ func (rm *resourceManager) newCreateRequestPayload(
 					return nil, fmt.Errorf("error: field SpotInstancePools is of type int32")
 				}
 				spotInstancePoolsCopy := int32(spotInstancePoolsCopy0)
-				f23f0.SpotInstancePools = &spotInstancePoolsCopy
+				f22f0.SpotInstancePools = &spotInstancePoolsCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice != nil {
-				f23f0.SpotMaxPrice = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice
+				f22f0.SpotMaxPrice = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice
 			}
-			f23.InstancesDistribution = f23f0
+			f22.InstancesDistribution = f22f0
 		}
 		if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate != nil {
-			f23f1 := &svcsdktypes.LaunchTemplate{}
+			f22f1 := &svcsdktypes.LaunchTemplate{}
 			if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification != nil {
-				f23f1f0 := &svcsdktypes.LaunchTemplateSpecification{}
+				f22f1f0 := &svcsdktypes.LaunchTemplateSpecification{}
 				if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName != nil {
-					f23f1f0.LaunchTemplateName = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName
+					f22f1f0.LaunchTemplateName = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName
 				}
 				if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version != nil {
-					f23f1f0.Version = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version
+					f22f1f0.Version = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version
 				}
-				f23f1.LaunchTemplateSpecification = f23f1f0
+				f22f1.LaunchTemplateSpecification = f22f1f0
 			}
 			if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides != nil {
-				f23f1f1 := []svcsdktypes.LaunchTemplateOverrides{}
-				for _, f23f1f1iter := range r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides {
-					f23f1f1elem := &svcsdktypes.LaunchTemplateOverrides{}
-					if f23f1f1iter.ImageID != nil {
-						f23f1f1elem.ImageId = f23f1f1iter.ImageID
+				f22f1f1 := []svcsdktypes.LaunchTemplateOverrides{}
+				for _, f22f1f1iter := range r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides {
+					f22f1f1elem := &svcsdktypes.LaunchTemplateOverrides{}
+					if f22f1f1iter.ImageID != nil {
+						f22f1f1elem.ImageId = f22f1f1iter.ImageID
 					}
-					if f23f1f1iter.InstanceRequirements != nil {
-						f23f1f1elemf1 := &svcsdktypes.InstanceRequirements{}
-						if f23f1f1iter.InstanceRequirements.AcceleratorCount != nil {
-							f23f1f1elemf1f0 := &svcsdktypes.AcceleratorCountRequest{}
-							if f23f1f1iter.InstanceRequirements.AcceleratorCount.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.AcceleratorCount.Max
+					if f22f1f1iter.InstanceRequirements != nil {
+						f22f1f1elemf1 := &svcsdktypes.InstanceRequirements{}
+						if f22f1f1iter.InstanceRequirements.AcceleratorCount != nil {
+							f22f1f1elemf1f0 := &svcsdktypes.AcceleratorCountRequest{}
+							if f22f1f1iter.InstanceRequirements.AcceleratorCount.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.AcceleratorCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f0.Max = &maxCopy
+								f22f1f1elemf1f0.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.AcceleratorCount.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.AcceleratorCount.Min
+							if f22f1f1iter.InstanceRequirements.AcceleratorCount.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.AcceleratorCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f0.Min = &minCopy
+								f22f1f1elemf1f0.Min = &minCopy
 							}
-							f23f1f1elemf1.AcceleratorCount = f23f1f1elemf1f0
+							f22f1f1elemf1.AcceleratorCount = f22f1f1elemf1f0
 						}
-						if f23f1f1iter.InstanceRequirements.AcceleratorManufacturers != nil {
-							f23f1f1elemf1f1 := []svcsdktypes.AcceleratorManufacturer{}
-							for _, f23f1f1elemf1f1iter := range f23f1f1iter.InstanceRequirements.AcceleratorManufacturers {
-								var f23f1f1elemf1f1elem string
-								f23f1f1elemf1f1elem = string(*f23f1f1elemf1f1iter)
-								f23f1f1elemf1f1 = append(f23f1f1elemf1f1, svcsdktypes.AcceleratorManufacturer(f23f1f1elemf1f1elem))
+						if f22f1f1iter.InstanceRequirements.AcceleratorManufacturers != nil {
+							f22f1f1elemf1f1 := []svcsdktypes.AcceleratorManufacturer{}
+							for _, f22f1f1elemf1f1iter := range f22f1f1iter.InstanceRequirements.AcceleratorManufacturers {
+								var f22f1f1elemf1f1elem string
+								f22f1f1elemf1f1elem = string(*f22f1f1elemf1f1iter)
+								f22f1f1elemf1f1 = append(f22f1f1elemf1f1, svcsdktypes.AcceleratorManufacturer(f22f1f1elemf1f1elem))
 							}
-							f23f1f1elemf1.AcceleratorManufacturers = f23f1f1elemf1f1
+							f22f1f1elemf1.AcceleratorManufacturers = f22f1f1elemf1f1
 						}
-						if f23f1f1iter.InstanceRequirements.AcceleratorNames != nil {
-							f23f1f1elemf1f2 := []svcsdktypes.AcceleratorName{}
-							for _, f23f1f1elemf1f2iter := range f23f1f1iter.InstanceRequirements.AcceleratorNames {
-								var f23f1f1elemf1f2elem string
-								f23f1f1elemf1f2elem = string(*f23f1f1elemf1f2iter)
-								f23f1f1elemf1f2 = append(f23f1f1elemf1f2, svcsdktypes.AcceleratorName(f23f1f1elemf1f2elem))
+						if f22f1f1iter.InstanceRequirements.AcceleratorNames != nil {
+							f22f1f1elemf1f2 := []svcsdktypes.AcceleratorName{}
+							for _, f22f1f1elemf1f2iter := range f22f1f1iter.InstanceRequirements.AcceleratorNames {
+								var f22f1f1elemf1f2elem string
+								f22f1f1elemf1f2elem = string(*f22f1f1elemf1f2iter)
+								f22f1f1elemf1f2 = append(f22f1f1elemf1f2, svcsdktypes.AcceleratorName(f22f1f1elemf1f2elem))
 							}
-							f23f1f1elemf1.AcceleratorNames = f23f1f1elemf1f2
+							f22f1f1elemf1.AcceleratorNames = f22f1f1elemf1f2
 						}
-						if f23f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB != nil {
-							f23f1f1elemf1f3 := &svcsdktypes.AcceleratorTotalMemoryMiBRequest{}
-							if f23f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max
+						if f22f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB != nil {
+							f22f1f1elemf1f3 := &svcsdktypes.AcceleratorTotalMemoryMiBRequest{}
+							if f22f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f3.Max = &maxCopy
+								f22f1f1elemf1f3.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min
+							if f22f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f3.Min = &minCopy
+								f22f1f1elemf1f3.Min = &minCopy
 							}
-							f23f1f1elemf1.AcceleratorTotalMemoryMiB = f23f1f1elemf1f3
+							f22f1f1elemf1.AcceleratorTotalMemoryMiB = f22f1f1elemf1f3
 						}
-						if f23f1f1iter.InstanceRequirements.AcceleratorTypes != nil {
-							f23f1f1elemf1f4 := []svcsdktypes.AcceleratorType{}
-							for _, f23f1f1elemf1f4iter := range f23f1f1iter.InstanceRequirements.AcceleratorTypes {
-								var f23f1f1elemf1f4elem string
-								f23f1f1elemf1f4elem = string(*f23f1f1elemf1f4iter)
-								f23f1f1elemf1f4 = append(f23f1f1elemf1f4, svcsdktypes.AcceleratorType(f23f1f1elemf1f4elem))
+						if f22f1f1iter.InstanceRequirements.AcceleratorTypes != nil {
+							f22f1f1elemf1f4 := []svcsdktypes.AcceleratorType{}
+							for _, f22f1f1elemf1f4iter := range f22f1f1iter.InstanceRequirements.AcceleratorTypes {
+								var f22f1f1elemf1f4elem string
+								f22f1f1elemf1f4elem = string(*f22f1f1elemf1f4iter)
+								f22f1f1elemf1f4 = append(f22f1f1elemf1f4, svcsdktypes.AcceleratorType(f22f1f1elemf1f4elem))
 							}
-							f23f1f1elemf1.AcceleratorTypes = f23f1f1elemf1f4
+							f22f1f1elemf1.AcceleratorTypes = f22f1f1elemf1f4
 						}
-						if f23f1f1iter.InstanceRequirements.AllowedInstanceTypes != nil {
-							f23f1f1elemf1.AllowedInstanceTypes = aws.ToStringSlice(f23f1f1iter.InstanceRequirements.AllowedInstanceTypes)
+						if f22f1f1iter.InstanceRequirements.AllowedInstanceTypes != nil {
+							f22f1f1elemf1.AllowedInstanceTypes = aws.ToStringSlice(f22f1f1iter.InstanceRequirements.AllowedInstanceTypes)
 						}
-						if f23f1f1iter.InstanceRequirements.BareMetal != nil {
-							f23f1f1elemf1.BareMetal = svcsdktypes.BareMetal(*f23f1f1iter.InstanceRequirements.BareMetal)
+						if f22f1f1iter.InstanceRequirements.BareMetal != nil {
+							f22f1f1elemf1.BareMetal = svcsdktypes.BareMetal(*f22f1f1iter.InstanceRequirements.BareMetal)
 						}
-						if f23f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps != nil {
-							f23f1f1elemf1f7 := &svcsdktypes.BaselineEbsBandwidthMbpsRequest{}
-							if f23f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max
+						if f22f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps != nil {
+							f22f1f1elemf1f7 := &svcsdktypes.BaselineEbsBandwidthMbpsRequest{}
+							if f22f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f7.Max = &maxCopy
+								f22f1f1elemf1f7.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min
+							if f22f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f7.Min = &minCopy
+								f22f1f1elemf1f7.Min = &minCopy
 							}
-							f23f1f1elemf1.BaselineEbsBandwidthMbps = f23f1f1elemf1f7
+							f22f1f1elemf1.BaselineEbsBandwidthMbps = f22f1f1elemf1f7
 						}
-						if f23f1f1iter.InstanceRequirements.BaselinePerformanceFactors != nil {
-							f23f1f1elemf1f8 := &svcsdktypes.BaselinePerformanceFactorsRequest{}
-							if f23f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU != nil {
-								f23f1f1elemf1f8f0 := &svcsdktypes.CpuPerformanceFactorRequest{}
-								if f23f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References != nil {
-									f23f1f1elemf1f8f0f0 := []svcsdktypes.PerformanceFactorReferenceRequest{}
-									for _, f23f1f1elemf1f8f0f0iter := range f23f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References {
-										f23f1f1elemf1f8f0f0elem := &svcsdktypes.PerformanceFactorReferenceRequest{}
-										if f23f1f1elemf1f8f0f0iter.InstanceFamily != nil {
-											f23f1f1elemf1f8f0f0elem.InstanceFamily = f23f1f1elemf1f8f0f0iter.InstanceFamily
+						if f22f1f1iter.InstanceRequirements.BaselinePerformanceFactors != nil {
+							f22f1f1elemf1f8 := &svcsdktypes.BaselinePerformanceFactorsRequest{}
+							if f22f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU != nil {
+								f22f1f1elemf1f8f0 := &svcsdktypes.CpuPerformanceFactorRequest{}
+								if f22f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References != nil {
+									f22f1f1elemf1f8f0f0 := []svcsdktypes.PerformanceFactorReferenceRequest{}
+									for _, f22f1f1elemf1f8f0f0iter := range f22f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References {
+										f22f1f1elemf1f8f0f0elem := &svcsdktypes.PerformanceFactorReferenceRequest{}
+										if f22f1f1elemf1f8f0f0iter.InstanceFamily != nil {
+											f22f1f1elemf1f8f0f0elem.InstanceFamily = f22f1f1elemf1f8f0f0iter.InstanceFamily
 										}
-										f23f1f1elemf1f8f0f0 = append(f23f1f1elemf1f8f0f0, *f23f1f1elemf1f8f0f0elem)
+										f22f1f1elemf1f8f0f0 = append(f22f1f1elemf1f8f0f0, *f22f1f1elemf1f8f0f0elem)
 									}
-									f23f1f1elemf1f8f0.References = f23f1f1elemf1f8f0f0
+									f22f1f1elemf1f8f0.References = f22f1f1elemf1f8f0f0
 								}
-								f23f1f1elemf1f8.Cpu = f23f1f1elemf1f8f0
+								f22f1f1elemf1f8.Cpu = f22f1f1elemf1f8f0
 							}
-							f23f1f1elemf1.BaselinePerformanceFactors = f23f1f1elemf1f8
+							f22f1f1elemf1.BaselinePerformanceFactors = f22f1f1elemf1f8
 						}
-						if f23f1f1iter.InstanceRequirements.BurstablePerformance != nil {
-							f23f1f1elemf1.BurstablePerformance = svcsdktypes.BurstablePerformance(*f23f1f1iter.InstanceRequirements.BurstablePerformance)
+						if f22f1f1iter.InstanceRequirements.BurstablePerformance != nil {
+							f22f1f1elemf1.BurstablePerformance = svcsdktypes.BurstablePerformance(*f22f1f1iter.InstanceRequirements.BurstablePerformance)
 						}
-						if f23f1f1iter.InstanceRequirements.CPUManufacturers != nil {
-							f23f1f1elemf1f10 := []svcsdktypes.CpuManufacturer{}
-							for _, f23f1f1elemf1f10iter := range f23f1f1iter.InstanceRequirements.CPUManufacturers {
-								var f23f1f1elemf1f10elem string
-								f23f1f1elemf1f10elem = string(*f23f1f1elemf1f10iter)
-								f23f1f1elemf1f10 = append(f23f1f1elemf1f10, svcsdktypes.CpuManufacturer(f23f1f1elemf1f10elem))
+						if f22f1f1iter.InstanceRequirements.CPUManufacturers != nil {
+							f22f1f1elemf1f10 := []svcsdktypes.CpuManufacturer{}
+							for _, f22f1f1elemf1f10iter := range f22f1f1iter.InstanceRequirements.CPUManufacturers {
+								var f22f1f1elemf1f10elem string
+								f22f1f1elemf1f10elem = string(*f22f1f1elemf1f10iter)
+								f22f1f1elemf1f10 = append(f22f1f1elemf1f10, svcsdktypes.CpuManufacturer(f22f1f1elemf1f10elem))
 							}
-							f23f1f1elemf1.CpuManufacturers = f23f1f1elemf1f10
+							f22f1f1elemf1.CpuManufacturers = f22f1f1elemf1f10
 						}
-						if f23f1f1iter.InstanceRequirements.ExcludedInstanceTypes != nil {
-							f23f1f1elemf1.ExcludedInstanceTypes = aws.ToStringSlice(f23f1f1iter.InstanceRequirements.ExcludedInstanceTypes)
+						if f22f1f1iter.InstanceRequirements.ExcludedInstanceTypes != nil {
+							f22f1f1elemf1.ExcludedInstanceTypes = aws.ToStringSlice(f22f1f1iter.InstanceRequirements.ExcludedInstanceTypes)
 						}
-						if f23f1f1iter.InstanceRequirements.InstanceGenerations != nil {
-							f23f1f1elemf1f12 := []svcsdktypes.InstanceGeneration{}
-							for _, f23f1f1elemf1f12iter := range f23f1f1iter.InstanceRequirements.InstanceGenerations {
-								var f23f1f1elemf1f12elem string
-								f23f1f1elemf1f12elem = string(*f23f1f1elemf1f12iter)
-								f23f1f1elemf1f12 = append(f23f1f1elemf1f12, svcsdktypes.InstanceGeneration(f23f1f1elemf1f12elem))
+						if f22f1f1iter.InstanceRequirements.InstanceGenerations != nil {
+							f22f1f1elemf1f12 := []svcsdktypes.InstanceGeneration{}
+							for _, f22f1f1elemf1f12iter := range f22f1f1iter.InstanceRequirements.InstanceGenerations {
+								var f22f1f1elemf1f12elem string
+								f22f1f1elemf1f12elem = string(*f22f1f1elemf1f12iter)
+								f22f1f1elemf1f12 = append(f22f1f1elemf1f12, svcsdktypes.InstanceGeneration(f22f1f1elemf1f12elem))
 							}
-							f23f1f1elemf1.InstanceGenerations = f23f1f1elemf1f12
+							f22f1f1elemf1.InstanceGenerations = f22f1f1elemf1f12
 						}
-						if f23f1f1iter.InstanceRequirements.LocalStorage != nil {
-							f23f1f1elemf1.LocalStorage = svcsdktypes.LocalStorage(*f23f1f1iter.InstanceRequirements.LocalStorage)
+						if f22f1f1iter.InstanceRequirements.LocalStorage != nil {
+							f22f1f1elemf1.LocalStorage = svcsdktypes.LocalStorage(*f22f1f1iter.InstanceRequirements.LocalStorage)
 						}
-						if f23f1f1iter.InstanceRequirements.LocalStorageTypes != nil {
-							f23f1f1elemf1f14 := []svcsdktypes.LocalStorageType{}
-							for _, f23f1f1elemf1f14iter := range f23f1f1iter.InstanceRequirements.LocalStorageTypes {
-								var f23f1f1elemf1f14elem string
-								f23f1f1elemf1f14elem = string(*f23f1f1elemf1f14iter)
-								f23f1f1elemf1f14 = append(f23f1f1elemf1f14, svcsdktypes.LocalStorageType(f23f1f1elemf1f14elem))
+						if f22f1f1iter.InstanceRequirements.LocalStorageTypes != nil {
+							f22f1f1elemf1f14 := []svcsdktypes.LocalStorageType{}
+							for _, f22f1f1elemf1f14iter := range f22f1f1iter.InstanceRequirements.LocalStorageTypes {
+								var f22f1f1elemf1f14elem string
+								f22f1f1elemf1f14elem = string(*f22f1f1elemf1f14iter)
+								f22f1f1elemf1f14 = append(f22f1f1elemf1f14, svcsdktypes.LocalStorageType(f22f1f1elemf1f14elem))
 							}
-							f23f1f1elemf1.LocalStorageTypes = f23f1f1elemf1f14
+							f22f1f1elemf1.LocalStorageTypes = f22f1f1elemf1f14
 						}
-						if f23f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice != nil {
-							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 := *f23f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice
+						if f22f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice != nil {
+							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 := *f22f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice
 							if maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 > math.MaxInt32 || maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field MaxSpotPriceAsPercentageOfOptimalOnDemandPrice is of type int32")
 							}
 							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy := int32(maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0)
-							f23f1f1elemf1.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice = &maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy
+							f22f1f1elemf1.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice = &maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy
 						}
-						if f23f1f1iter.InstanceRequirements.MemoryGiBPerVCPU != nil {
-							f23f1f1elemf1f16 := &svcsdktypes.MemoryGiBPerVCpuRequest{}
-							if f23f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max != nil {
-								f23f1f1elemf1f16.Max = f23f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max
+						if f22f1f1iter.InstanceRequirements.MemoryGiBPerVCPU != nil {
+							f22f1f1elemf1f16 := &svcsdktypes.MemoryGiBPerVCpuRequest{}
+							if f22f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max != nil {
+								f22f1f1elemf1f16.Max = f22f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max
 							}
-							if f23f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min != nil {
-								f23f1f1elemf1f16.Min = f23f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min
+							if f22f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min != nil {
+								f22f1f1elemf1f16.Min = f22f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min
 							}
-							f23f1f1elemf1.MemoryGiBPerVCpu = f23f1f1elemf1f16
+							f22f1f1elemf1.MemoryGiBPerVCpu = f22f1f1elemf1f16
 						}
-						if f23f1f1iter.InstanceRequirements.MemoryMiB != nil {
-							f23f1f1elemf1f17 := &svcsdktypes.MemoryMiBRequest{}
-							if f23f1f1iter.InstanceRequirements.MemoryMiB.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.MemoryMiB.Max
+						if f22f1f1iter.InstanceRequirements.MemoryMiB != nil {
+							f22f1f1elemf1f17 := &svcsdktypes.MemoryMiBRequest{}
+							if f22f1f1iter.InstanceRequirements.MemoryMiB.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.MemoryMiB.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f17.Max = &maxCopy
+								f22f1f1elemf1f17.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.MemoryMiB.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.MemoryMiB.Min
+							if f22f1f1iter.InstanceRequirements.MemoryMiB.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.MemoryMiB.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f17.Min = &minCopy
+								f22f1f1elemf1f17.Min = &minCopy
 							}
-							f23f1f1elemf1.MemoryMiB = f23f1f1elemf1f17
+							f22f1f1elemf1.MemoryMiB = f22f1f1elemf1f17
 						}
-						if f23f1f1iter.InstanceRequirements.NetworkBandwidthGbps != nil {
-							f23f1f1elemf1f18 := &svcsdktypes.NetworkBandwidthGbpsRequest{}
-							if f23f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max != nil {
-								f23f1f1elemf1f18.Max = f23f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max
+						if f22f1f1iter.InstanceRequirements.NetworkBandwidthGbps != nil {
+							f22f1f1elemf1f18 := &svcsdktypes.NetworkBandwidthGbpsRequest{}
+							if f22f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max != nil {
+								f22f1f1elemf1f18.Max = f22f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max
 							}
-							if f23f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min != nil {
-								f23f1f1elemf1f18.Min = f23f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min
+							if f22f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min != nil {
+								f22f1f1elemf1f18.Min = f22f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min
 							}
-							f23f1f1elemf1.NetworkBandwidthGbps = f23f1f1elemf1f18
+							f22f1f1elemf1.NetworkBandwidthGbps = f22f1f1elemf1f18
 						}
-						if f23f1f1iter.InstanceRequirements.NetworkInterfaceCount != nil {
-							f23f1f1elemf1f19 := &svcsdktypes.NetworkInterfaceCountRequest{}
-							if f23f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max
+						if f22f1f1iter.InstanceRequirements.NetworkInterfaceCount != nil {
+							f22f1f1elemf1f19 := &svcsdktypes.NetworkInterfaceCountRequest{}
+							if f22f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f19.Max = &maxCopy
+								f22f1f1elemf1f19.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min
+							if f22f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f19.Min = &minCopy
+								f22f1f1elemf1f19.Min = &minCopy
 							}
-							f23f1f1elemf1.NetworkInterfaceCount = f23f1f1elemf1f19
+							f22f1f1elemf1.NetworkInterfaceCount = f22f1f1elemf1f19
 						}
-						if f23f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice != nil {
-							onDemandMaxPricePercentageOverLowestPriceCopy0 := *f23f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice
+						if f22f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice != nil {
+							onDemandMaxPricePercentageOverLowestPriceCopy0 := *f22f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice
 							if onDemandMaxPricePercentageOverLowestPriceCopy0 > math.MaxInt32 || onDemandMaxPricePercentageOverLowestPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field OnDemandMaxPricePercentageOverLowestPrice is of type int32")
 							}
 							onDemandMaxPricePercentageOverLowestPriceCopy := int32(onDemandMaxPricePercentageOverLowestPriceCopy0)
-							f23f1f1elemf1.OnDemandMaxPricePercentageOverLowestPrice = &onDemandMaxPricePercentageOverLowestPriceCopy
+							f22f1f1elemf1.OnDemandMaxPricePercentageOverLowestPrice = &onDemandMaxPricePercentageOverLowestPriceCopy
 						}
-						if f23f1f1iter.InstanceRequirements.RequireHibernateSupport != nil {
-							f23f1f1elemf1.RequireHibernateSupport = f23f1f1iter.InstanceRequirements.RequireHibernateSupport
+						if f22f1f1iter.InstanceRequirements.RequireHibernateSupport != nil {
+							f22f1f1elemf1.RequireHibernateSupport = f22f1f1iter.InstanceRequirements.RequireHibernateSupport
 						}
-						if f23f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice != nil {
-							spotMaxPricePercentageOverLowestPriceCopy0 := *f23f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice
+						if f22f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice != nil {
+							spotMaxPricePercentageOverLowestPriceCopy0 := *f22f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice
 							if spotMaxPricePercentageOverLowestPriceCopy0 > math.MaxInt32 || spotMaxPricePercentageOverLowestPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field SpotMaxPricePercentageOverLowestPrice is of type int32")
 							}
 							spotMaxPricePercentageOverLowestPriceCopy := int32(spotMaxPricePercentageOverLowestPriceCopy0)
-							f23f1f1elemf1.SpotMaxPricePercentageOverLowestPrice = &spotMaxPricePercentageOverLowestPriceCopy
+							f22f1f1elemf1.SpotMaxPricePercentageOverLowestPrice = &spotMaxPricePercentageOverLowestPriceCopy
 						}
-						if f23f1f1iter.InstanceRequirements.TotalLocalStorageGB != nil {
-							f23f1f1elemf1f23 := &svcsdktypes.TotalLocalStorageGBRequest{}
-							if f23f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max != nil {
-								f23f1f1elemf1f23.Max = f23f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max
+						if f22f1f1iter.InstanceRequirements.TotalLocalStorageGB != nil {
+							f22f1f1elemf1f23 := &svcsdktypes.TotalLocalStorageGBRequest{}
+							if f22f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max != nil {
+								f22f1f1elemf1f23.Max = f22f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max
 							}
-							if f23f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min != nil {
-								f23f1f1elemf1f23.Min = f23f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min
+							if f22f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min != nil {
+								f22f1f1elemf1f23.Min = f22f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min
 							}
-							f23f1f1elemf1.TotalLocalStorageGB = f23f1f1elemf1f23
+							f22f1f1elemf1.TotalLocalStorageGB = f22f1f1elemf1f23
 						}
-						if f23f1f1iter.InstanceRequirements.VCPUCount != nil {
-							f23f1f1elemf1f24 := &svcsdktypes.VCpuCountRequest{}
-							if f23f1f1iter.InstanceRequirements.VCPUCount.Max != nil {
-								maxCopy0 := *f23f1f1iter.InstanceRequirements.VCPUCount.Max
+						if f22f1f1iter.InstanceRequirements.VCPUCount != nil {
+							f22f1f1elemf1f24 := &svcsdktypes.VCpuCountRequest{}
+							if f22f1f1iter.InstanceRequirements.VCPUCount.Max != nil {
+								maxCopy0 := *f22f1f1iter.InstanceRequirements.VCPUCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f23f1f1elemf1f24.Max = &maxCopy
+								f22f1f1elemf1f24.Max = &maxCopy
 							}
-							if f23f1f1iter.InstanceRequirements.VCPUCount.Min != nil {
-								minCopy0 := *f23f1f1iter.InstanceRequirements.VCPUCount.Min
+							if f22f1f1iter.InstanceRequirements.VCPUCount.Min != nil {
+								minCopy0 := *f22f1f1iter.InstanceRequirements.VCPUCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f23f1f1elemf1f24.Min = &minCopy
+								f22f1f1elemf1f24.Min = &minCopy
 							}
-							f23f1f1elemf1.VCpuCount = f23f1f1elemf1f24
+							f22f1f1elemf1.VCpuCount = f22f1f1elemf1f24
 						}
-						f23f1f1elem.InstanceRequirements = f23f1f1elemf1
+						f22f1f1elem.InstanceRequirements = f22f1f1elemf1
 					}
-					if f23f1f1iter.InstanceType != nil {
-						f23f1f1elem.InstanceType = f23f1f1iter.InstanceType
+					if f22f1f1iter.InstanceType != nil {
+						f22f1f1elem.InstanceType = f22f1f1iter.InstanceType
 					}
-					if f23f1f1iter.LaunchTemplateSpecification != nil {
-						f23f1f1elemf3 := &svcsdktypes.LaunchTemplateSpecification{}
-						if f23f1f1iter.LaunchTemplateSpecification.LaunchTemplateName != nil {
-							f23f1f1elemf3.LaunchTemplateName = f23f1f1iter.LaunchTemplateSpecification.LaunchTemplateName
+					if f22f1f1iter.LaunchTemplateSpecification != nil {
+						f22f1f1elemf3 := &svcsdktypes.LaunchTemplateSpecification{}
+						if f22f1f1iter.LaunchTemplateSpecification.LaunchTemplateName != nil {
+							f22f1f1elemf3.LaunchTemplateName = f22f1f1iter.LaunchTemplateSpecification.LaunchTemplateName
 						}
-						if f23f1f1iter.LaunchTemplateSpecification.Version != nil {
-							f23f1f1elemf3.Version = f23f1f1iter.LaunchTemplateSpecification.Version
+						if f22f1f1iter.LaunchTemplateSpecification.Version != nil {
+							f22f1f1elemf3.Version = f22f1f1iter.LaunchTemplateSpecification.Version
 						}
-						f23f1f1elem.LaunchTemplateSpecification = f23f1f1elemf3
+						f22f1f1elem.LaunchTemplateSpecification = f22f1f1elemf3
 					}
-					if f23f1f1iter.WeightedCapacity != nil {
-						f23f1f1elem.WeightedCapacity = f23f1f1iter.WeightedCapacity
+					if f22f1f1iter.WeightedCapacity != nil {
+						f22f1f1elem.WeightedCapacity = f22f1f1iter.WeightedCapacity
 					}
-					f23f1f1 = append(f23f1f1, *f23f1f1elem)
+					f22f1f1 = append(f22f1f1, *f22f1f1elem)
 				}
-				f23f1.Overrides = f23f1f1
+				f22f1.Overrides = f22f1f1
 			}
-			f23.LaunchTemplate = f23f1
+			f22.LaunchTemplate = f22f1
 		}
-		res.MixedInstancesPolicy = f23
+		res.MixedInstancesPolicy = f22
 	}
 	if r.ko.Spec.NewInstancesProtectedFromScaleIn != nil {
 		res.NewInstancesProtectedFromScaleIn = r.ko.Spec.NewInstancesProtectedFromScaleIn
@@ -1321,18 +1313,18 @@ func (rm *resourceManager) newCreateRequestPayload(
 		res.SkipZonalShiftValidation = r.ko.Spec.SkipZonalShiftValidation
 	}
 	if r.ko.Spec.Tags != nil {
-		f28 := []svcsdktypes.Tag{}
-		for _, f28iter := range r.ko.Spec.Tags {
-			f28elem := &svcsdktypes.Tag{}
-			if f28iter.Key != nil {
-				f28elem.Key = f28iter.Key
+		f27 := []svcsdktypes.Tag{}
+		for _, f27iter := range r.ko.Spec.Tags {
+			f27elem := &svcsdktypes.Tag{}
+			if f27iter.Key != nil {
+				f27elem.Key = f27iter.Key
 			}
-			if f28iter.Value != nil {
-				f28elem.Value = f28iter.Value
+			if f27iter.Value != nil {
+				f27elem.Value = f27iter.Value
 			}
-			f28 = append(f28, *f28elem)
+			f27 = append(f27, *f27elem)
 		}
-		res.Tags = f28
+		res.Tags = f27
 	}
 	if r.ko.Spec.TargetGroupARNs != nil {
 		res.TargetGroupARNs = aws.ToStringSlice(r.ko.Spec.TargetGroupARNs)
@@ -1341,18 +1333,18 @@ func (rm *resourceManager) newCreateRequestPayload(
 		res.TerminationPolicies = aws.ToStringSlice(r.ko.Spec.TerminationPolicies)
 	}
 	if r.ko.Spec.TrafficSources != nil {
-		f31 := []svcsdktypes.TrafficSourceIdentifier{}
-		for _, f31iter := range r.ko.Spec.TrafficSources {
-			f31elem := &svcsdktypes.TrafficSourceIdentifier{}
-			if f31iter.Identifier != nil {
-				f31elem.Identifier = f31iter.Identifier
+		f30 := []svcsdktypes.TrafficSourceIdentifier{}
+		for _, f30iter := range r.ko.Spec.TrafficSources {
+			f30elem := &svcsdktypes.TrafficSourceIdentifier{}
+			if f30iter.Identifier != nil {
+				f30elem.Identifier = f30iter.Identifier
 			}
-			if f31iter.Type != nil {
-				f31elem.Type = f31iter.Type
+			if f30iter.Type != nil {
+				f30elem.Type = f30iter.Type
 			}
-			f31 = append(f31, *f31elem)
+			f30 = append(f30, *f30elem)
 		}
-		res.TrafficSources = f31
+		res.TrafficSources = f30
 	}
 	if r.ko.Spec.VPCZoneIdentifier != nil {
 		res.VPCZoneIdentifier = r.ko.Spec.VPCZoneIdentifier
@@ -1478,9 +1470,6 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		defaultInstanceWarmupCopy := int32(defaultInstanceWarmupCopy0)
 		res.DefaultInstanceWarmup = &defaultInstanceWarmupCopy
 	}
-	if r.ko.Spec.DeletionProtection != nil {
-		res.DeletionProtection = svcsdktypes.DeletionProtection(*r.ko.Spec.DeletionProtection)
-	}
 	if r.ko.Spec.DesiredCapacity != nil {
 		desiredCapacityCopy0 := *r.ko.Spec.DesiredCapacity
 		if desiredCapacityCopy0 > math.MaxInt32 || desiredCapacityCopy0 < math.MinInt32 {
@@ -1504,25 +1493,25 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		res.HealthCheckType = r.ko.Spec.HealthCheckType
 	}
 	if r.ko.Spec.InstanceLifecyclePolicy != nil {
-		f14 := &svcsdktypes.InstanceLifecyclePolicy{}
+		f13 := &svcsdktypes.InstanceLifecyclePolicy{}
 		if r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers != nil {
-			f14f0 := &svcsdktypes.RetentionTriggers{}
+			f13f0 := &svcsdktypes.RetentionTriggers{}
 			if r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon != nil {
-				f14f0.TerminateHookAbandon = svcsdktypes.RetentionAction(*r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
+				f13f0.TerminateHookAbandon = svcsdktypes.RetentionAction(*r.ko.Spec.InstanceLifecyclePolicy.RetentionTriggers.TerminateHookAbandon)
 			}
-			f14.RetentionTriggers = f14f0
+			f13.RetentionTriggers = f13f0
 		}
-		res.InstanceLifecyclePolicy = f14
+		res.InstanceLifecyclePolicy = f13
 	}
 	if r.ko.Spec.InstanceMaintenancePolicy != nil {
-		f15 := &svcsdktypes.InstanceMaintenancePolicy{}
+		f14 := &svcsdktypes.InstanceMaintenancePolicy{}
 		if r.ko.Spec.InstanceMaintenancePolicy.MaxHealthyPercentage != nil {
 			maxHealthyPercentageCopy0 := *r.ko.Spec.InstanceMaintenancePolicy.MaxHealthyPercentage
 			if maxHealthyPercentageCopy0 > math.MaxInt32 || maxHealthyPercentageCopy0 < math.MinInt32 {
 				return nil, fmt.Errorf("error: field MaxHealthyPercentage is of type int32")
 			}
 			maxHealthyPercentageCopy := int32(maxHealthyPercentageCopy0)
-			f15.MaxHealthyPercentage = &maxHealthyPercentageCopy
+			f14.MaxHealthyPercentage = &maxHealthyPercentageCopy
 		}
 		if r.ko.Spec.InstanceMaintenancePolicy.MinHealthyPercentage != nil {
 			minHealthyPercentageCopy0 := *r.ko.Spec.InstanceMaintenancePolicy.MinHealthyPercentage
@@ -1530,22 +1519,22 @@ func (rm *resourceManager) newUpdateRequestPayload(
 				return nil, fmt.Errorf("error: field MinHealthyPercentage is of type int32")
 			}
 			minHealthyPercentageCopy := int32(minHealthyPercentageCopy0)
-			f15.MinHealthyPercentage = &minHealthyPercentageCopy
+			f14.MinHealthyPercentage = &minHealthyPercentageCopy
 		}
-		res.InstanceMaintenancePolicy = f15
+		res.InstanceMaintenancePolicy = f14
 	}
 	if r.ko.Spec.LaunchConfigurationName != nil {
 		res.LaunchConfigurationName = r.ko.Spec.LaunchConfigurationName
 	}
 	if r.ko.Spec.LaunchTemplate != nil {
-		f17 := &svcsdktypes.LaunchTemplateSpecification{}
+		f16 := &svcsdktypes.LaunchTemplateSpecification{}
 		if r.ko.Spec.LaunchTemplate.LaunchTemplateName != nil {
-			f17.LaunchTemplateName = r.ko.Spec.LaunchTemplate.LaunchTemplateName
+			f16.LaunchTemplateName = r.ko.Spec.LaunchTemplate.LaunchTemplateName
 		}
 		if r.ko.Spec.LaunchTemplate.Version != nil {
-			f17.Version = r.ko.Spec.LaunchTemplate.Version
+			f16.Version = r.ko.Spec.LaunchTemplate.Version
 		}
-		res.LaunchTemplate = f17
+		res.LaunchTemplate = f16
 	}
 	if r.ko.Spec.MaxInstanceLifetime != nil {
 		maxInstanceLifetimeCopy0 := *r.ko.Spec.MaxInstanceLifetime
@@ -1572,11 +1561,11 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		res.MinSize = &minSizeCopy
 	}
 	if r.ko.Spec.MixedInstancesPolicy != nil {
-		f21 := &svcsdktypes.MixedInstancesPolicy{}
+		f20 := &svcsdktypes.MixedInstancesPolicy{}
 		if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution != nil {
-			f21f0 := &svcsdktypes.InstancesDistribution{}
+			f20f0 := &svcsdktypes.InstancesDistribution{}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy != nil {
-				f21f0.OnDemandAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy
+				f20f0.OnDemandAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandAllocationStrategy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity != nil {
 				onDemandBaseCapacityCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity
@@ -1584,7 +1573,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 					return nil, fmt.Errorf("error: field OnDemandBaseCapacity is of type int32")
 				}
 				onDemandBaseCapacityCopy := int32(onDemandBaseCapacityCopy0)
-				f21f0.OnDemandBaseCapacity = &onDemandBaseCapacityCopy
+				f20f0.OnDemandBaseCapacity = &onDemandBaseCapacityCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandPercentageAboveBaseCapacity != nil {
 				onDemandPercentageAboveBaseCapacityCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.OnDemandPercentageAboveBaseCapacity
@@ -1592,10 +1581,10 @@ func (rm *resourceManager) newUpdateRequestPayload(
 					return nil, fmt.Errorf("error: field OnDemandPercentageAboveBaseCapacity is of type int32")
 				}
 				onDemandPercentageAboveBaseCapacityCopy := int32(onDemandPercentageAboveBaseCapacityCopy0)
-				f21f0.OnDemandPercentageAboveBaseCapacity = &onDemandPercentageAboveBaseCapacityCopy
+				f20f0.OnDemandPercentageAboveBaseCapacity = &onDemandPercentageAboveBaseCapacityCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy != nil {
-				f21f0.SpotAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy
+				f20f0.SpotAllocationStrategy = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotAllocationStrategy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotInstancePools != nil {
 				spotInstancePoolsCopy0 := *r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotInstancePools
@@ -1603,324 +1592,324 @@ func (rm *resourceManager) newUpdateRequestPayload(
 					return nil, fmt.Errorf("error: field SpotInstancePools is of type int32")
 				}
 				spotInstancePoolsCopy := int32(spotInstancePoolsCopy0)
-				f21f0.SpotInstancePools = &spotInstancePoolsCopy
+				f20f0.SpotInstancePools = &spotInstancePoolsCopy
 			}
 			if r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice != nil {
-				f21f0.SpotMaxPrice = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice
+				f20f0.SpotMaxPrice = r.ko.Spec.MixedInstancesPolicy.InstancesDistribution.SpotMaxPrice
 			}
-			f21.InstancesDistribution = f21f0
+			f20.InstancesDistribution = f20f0
 		}
 		if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate != nil {
-			f21f1 := &svcsdktypes.LaunchTemplate{}
+			f20f1 := &svcsdktypes.LaunchTemplate{}
 			if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification != nil {
-				f21f1f0 := &svcsdktypes.LaunchTemplateSpecification{}
+				f20f1f0 := &svcsdktypes.LaunchTemplateSpecification{}
 				if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName != nil {
-					f21f1f0.LaunchTemplateName = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName
+					f20f1f0.LaunchTemplateName = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateName
 				}
 				if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version != nil {
-					f21f1f0.Version = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version
+					f20f1f0.Version = r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.Version
 				}
-				f21f1.LaunchTemplateSpecification = f21f1f0
+				f20f1.LaunchTemplateSpecification = f20f1f0
 			}
 			if r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides != nil {
-				f21f1f1 := []svcsdktypes.LaunchTemplateOverrides{}
-				for _, f21f1f1iter := range r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides {
-					f21f1f1elem := &svcsdktypes.LaunchTemplateOverrides{}
-					if f21f1f1iter.ImageID != nil {
-						f21f1f1elem.ImageId = f21f1f1iter.ImageID
+				f20f1f1 := []svcsdktypes.LaunchTemplateOverrides{}
+				for _, f20f1f1iter := range r.ko.Spec.MixedInstancesPolicy.LaunchTemplate.Overrides {
+					f20f1f1elem := &svcsdktypes.LaunchTemplateOverrides{}
+					if f20f1f1iter.ImageID != nil {
+						f20f1f1elem.ImageId = f20f1f1iter.ImageID
 					}
-					if f21f1f1iter.InstanceRequirements != nil {
-						f21f1f1elemf1 := &svcsdktypes.InstanceRequirements{}
-						if f21f1f1iter.InstanceRequirements.AcceleratorCount != nil {
-							f21f1f1elemf1f0 := &svcsdktypes.AcceleratorCountRequest{}
-							if f21f1f1iter.InstanceRequirements.AcceleratorCount.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.AcceleratorCount.Max
+					if f20f1f1iter.InstanceRequirements != nil {
+						f20f1f1elemf1 := &svcsdktypes.InstanceRequirements{}
+						if f20f1f1iter.InstanceRequirements.AcceleratorCount != nil {
+							f20f1f1elemf1f0 := &svcsdktypes.AcceleratorCountRequest{}
+							if f20f1f1iter.InstanceRequirements.AcceleratorCount.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.AcceleratorCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f0.Max = &maxCopy
+								f20f1f1elemf1f0.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.AcceleratorCount.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.AcceleratorCount.Min
+							if f20f1f1iter.InstanceRequirements.AcceleratorCount.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.AcceleratorCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f0.Min = &minCopy
+								f20f1f1elemf1f0.Min = &minCopy
 							}
-							f21f1f1elemf1.AcceleratorCount = f21f1f1elemf1f0
+							f20f1f1elemf1.AcceleratorCount = f20f1f1elemf1f0
 						}
-						if f21f1f1iter.InstanceRequirements.AcceleratorManufacturers != nil {
-							f21f1f1elemf1f1 := []svcsdktypes.AcceleratorManufacturer{}
-							for _, f21f1f1elemf1f1iter := range f21f1f1iter.InstanceRequirements.AcceleratorManufacturers {
-								var f21f1f1elemf1f1elem string
-								f21f1f1elemf1f1elem = string(*f21f1f1elemf1f1iter)
-								f21f1f1elemf1f1 = append(f21f1f1elemf1f1, svcsdktypes.AcceleratorManufacturer(f21f1f1elemf1f1elem))
+						if f20f1f1iter.InstanceRequirements.AcceleratorManufacturers != nil {
+							f20f1f1elemf1f1 := []svcsdktypes.AcceleratorManufacturer{}
+							for _, f20f1f1elemf1f1iter := range f20f1f1iter.InstanceRequirements.AcceleratorManufacturers {
+								var f20f1f1elemf1f1elem string
+								f20f1f1elemf1f1elem = string(*f20f1f1elemf1f1iter)
+								f20f1f1elemf1f1 = append(f20f1f1elemf1f1, svcsdktypes.AcceleratorManufacturer(f20f1f1elemf1f1elem))
 							}
-							f21f1f1elemf1.AcceleratorManufacturers = f21f1f1elemf1f1
+							f20f1f1elemf1.AcceleratorManufacturers = f20f1f1elemf1f1
 						}
-						if f21f1f1iter.InstanceRequirements.AcceleratorNames != nil {
-							f21f1f1elemf1f2 := []svcsdktypes.AcceleratorName{}
-							for _, f21f1f1elemf1f2iter := range f21f1f1iter.InstanceRequirements.AcceleratorNames {
-								var f21f1f1elemf1f2elem string
-								f21f1f1elemf1f2elem = string(*f21f1f1elemf1f2iter)
-								f21f1f1elemf1f2 = append(f21f1f1elemf1f2, svcsdktypes.AcceleratorName(f21f1f1elemf1f2elem))
+						if f20f1f1iter.InstanceRequirements.AcceleratorNames != nil {
+							f20f1f1elemf1f2 := []svcsdktypes.AcceleratorName{}
+							for _, f20f1f1elemf1f2iter := range f20f1f1iter.InstanceRequirements.AcceleratorNames {
+								var f20f1f1elemf1f2elem string
+								f20f1f1elemf1f2elem = string(*f20f1f1elemf1f2iter)
+								f20f1f1elemf1f2 = append(f20f1f1elemf1f2, svcsdktypes.AcceleratorName(f20f1f1elemf1f2elem))
 							}
-							f21f1f1elemf1.AcceleratorNames = f21f1f1elemf1f2
+							f20f1f1elemf1.AcceleratorNames = f20f1f1elemf1f2
 						}
-						if f21f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB != nil {
-							f21f1f1elemf1f3 := &svcsdktypes.AcceleratorTotalMemoryMiBRequest{}
-							if f21f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max
+						if f20f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB != nil {
+							f20f1f1elemf1f3 := &svcsdktypes.AcceleratorTotalMemoryMiBRequest{}
+							if f20f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f3.Max = &maxCopy
+								f20f1f1elemf1f3.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min
+							if f20f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.AcceleratorTotalMemoryMiB.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f3.Min = &minCopy
+								f20f1f1elemf1f3.Min = &minCopy
 							}
-							f21f1f1elemf1.AcceleratorTotalMemoryMiB = f21f1f1elemf1f3
+							f20f1f1elemf1.AcceleratorTotalMemoryMiB = f20f1f1elemf1f3
 						}
-						if f21f1f1iter.InstanceRequirements.AcceleratorTypes != nil {
-							f21f1f1elemf1f4 := []svcsdktypes.AcceleratorType{}
-							for _, f21f1f1elemf1f4iter := range f21f1f1iter.InstanceRequirements.AcceleratorTypes {
-								var f21f1f1elemf1f4elem string
-								f21f1f1elemf1f4elem = string(*f21f1f1elemf1f4iter)
-								f21f1f1elemf1f4 = append(f21f1f1elemf1f4, svcsdktypes.AcceleratorType(f21f1f1elemf1f4elem))
+						if f20f1f1iter.InstanceRequirements.AcceleratorTypes != nil {
+							f20f1f1elemf1f4 := []svcsdktypes.AcceleratorType{}
+							for _, f20f1f1elemf1f4iter := range f20f1f1iter.InstanceRequirements.AcceleratorTypes {
+								var f20f1f1elemf1f4elem string
+								f20f1f1elemf1f4elem = string(*f20f1f1elemf1f4iter)
+								f20f1f1elemf1f4 = append(f20f1f1elemf1f4, svcsdktypes.AcceleratorType(f20f1f1elemf1f4elem))
 							}
-							f21f1f1elemf1.AcceleratorTypes = f21f1f1elemf1f4
+							f20f1f1elemf1.AcceleratorTypes = f20f1f1elemf1f4
 						}
-						if f21f1f1iter.InstanceRequirements.AllowedInstanceTypes != nil {
-							f21f1f1elemf1.AllowedInstanceTypes = aws.ToStringSlice(f21f1f1iter.InstanceRequirements.AllowedInstanceTypes)
+						if f20f1f1iter.InstanceRequirements.AllowedInstanceTypes != nil {
+							f20f1f1elemf1.AllowedInstanceTypes = aws.ToStringSlice(f20f1f1iter.InstanceRequirements.AllowedInstanceTypes)
 						}
-						if f21f1f1iter.InstanceRequirements.BareMetal != nil {
-							f21f1f1elemf1.BareMetal = svcsdktypes.BareMetal(*f21f1f1iter.InstanceRequirements.BareMetal)
+						if f20f1f1iter.InstanceRequirements.BareMetal != nil {
+							f20f1f1elemf1.BareMetal = svcsdktypes.BareMetal(*f20f1f1iter.InstanceRequirements.BareMetal)
 						}
-						if f21f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps != nil {
-							f21f1f1elemf1f7 := &svcsdktypes.BaselineEbsBandwidthMbpsRequest{}
-							if f21f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max
+						if f20f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps != nil {
+							f20f1f1elemf1f7 := &svcsdktypes.BaselineEbsBandwidthMbpsRequest{}
+							if f20f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f7.Max = &maxCopy
+								f20f1f1elemf1f7.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min
+							if f20f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.BaselineEBSBandwidthMbps.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f7.Min = &minCopy
+								f20f1f1elemf1f7.Min = &minCopy
 							}
-							f21f1f1elemf1.BaselineEbsBandwidthMbps = f21f1f1elemf1f7
+							f20f1f1elemf1.BaselineEbsBandwidthMbps = f20f1f1elemf1f7
 						}
-						if f21f1f1iter.InstanceRequirements.BaselinePerformanceFactors != nil {
-							f21f1f1elemf1f8 := &svcsdktypes.BaselinePerformanceFactorsRequest{}
-							if f21f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU != nil {
-								f21f1f1elemf1f8f0 := &svcsdktypes.CpuPerformanceFactorRequest{}
-								if f21f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References != nil {
-									f21f1f1elemf1f8f0f0 := []svcsdktypes.PerformanceFactorReferenceRequest{}
-									for _, f21f1f1elemf1f8f0f0iter := range f21f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References {
-										f21f1f1elemf1f8f0f0elem := &svcsdktypes.PerformanceFactorReferenceRequest{}
-										if f21f1f1elemf1f8f0f0iter.InstanceFamily != nil {
-											f21f1f1elemf1f8f0f0elem.InstanceFamily = f21f1f1elemf1f8f0f0iter.InstanceFamily
+						if f20f1f1iter.InstanceRequirements.BaselinePerformanceFactors != nil {
+							f20f1f1elemf1f8 := &svcsdktypes.BaselinePerformanceFactorsRequest{}
+							if f20f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU != nil {
+								f20f1f1elemf1f8f0 := &svcsdktypes.CpuPerformanceFactorRequest{}
+								if f20f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References != nil {
+									f20f1f1elemf1f8f0f0 := []svcsdktypes.PerformanceFactorReferenceRequest{}
+									for _, f20f1f1elemf1f8f0f0iter := range f20f1f1iter.InstanceRequirements.BaselinePerformanceFactors.CPU.References {
+										f20f1f1elemf1f8f0f0elem := &svcsdktypes.PerformanceFactorReferenceRequest{}
+										if f20f1f1elemf1f8f0f0iter.InstanceFamily != nil {
+											f20f1f1elemf1f8f0f0elem.InstanceFamily = f20f1f1elemf1f8f0f0iter.InstanceFamily
 										}
-										f21f1f1elemf1f8f0f0 = append(f21f1f1elemf1f8f0f0, *f21f1f1elemf1f8f0f0elem)
+										f20f1f1elemf1f8f0f0 = append(f20f1f1elemf1f8f0f0, *f20f1f1elemf1f8f0f0elem)
 									}
-									f21f1f1elemf1f8f0.References = f21f1f1elemf1f8f0f0
+									f20f1f1elemf1f8f0.References = f20f1f1elemf1f8f0f0
 								}
-								f21f1f1elemf1f8.Cpu = f21f1f1elemf1f8f0
+								f20f1f1elemf1f8.Cpu = f20f1f1elemf1f8f0
 							}
-							f21f1f1elemf1.BaselinePerformanceFactors = f21f1f1elemf1f8
+							f20f1f1elemf1.BaselinePerformanceFactors = f20f1f1elemf1f8
 						}
-						if f21f1f1iter.InstanceRequirements.BurstablePerformance != nil {
-							f21f1f1elemf1.BurstablePerformance = svcsdktypes.BurstablePerformance(*f21f1f1iter.InstanceRequirements.BurstablePerformance)
+						if f20f1f1iter.InstanceRequirements.BurstablePerformance != nil {
+							f20f1f1elemf1.BurstablePerformance = svcsdktypes.BurstablePerformance(*f20f1f1iter.InstanceRequirements.BurstablePerformance)
 						}
-						if f21f1f1iter.InstanceRequirements.CPUManufacturers != nil {
-							f21f1f1elemf1f10 := []svcsdktypes.CpuManufacturer{}
-							for _, f21f1f1elemf1f10iter := range f21f1f1iter.InstanceRequirements.CPUManufacturers {
-								var f21f1f1elemf1f10elem string
-								f21f1f1elemf1f10elem = string(*f21f1f1elemf1f10iter)
-								f21f1f1elemf1f10 = append(f21f1f1elemf1f10, svcsdktypes.CpuManufacturer(f21f1f1elemf1f10elem))
+						if f20f1f1iter.InstanceRequirements.CPUManufacturers != nil {
+							f20f1f1elemf1f10 := []svcsdktypes.CpuManufacturer{}
+							for _, f20f1f1elemf1f10iter := range f20f1f1iter.InstanceRequirements.CPUManufacturers {
+								var f20f1f1elemf1f10elem string
+								f20f1f1elemf1f10elem = string(*f20f1f1elemf1f10iter)
+								f20f1f1elemf1f10 = append(f20f1f1elemf1f10, svcsdktypes.CpuManufacturer(f20f1f1elemf1f10elem))
 							}
-							f21f1f1elemf1.CpuManufacturers = f21f1f1elemf1f10
+							f20f1f1elemf1.CpuManufacturers = f20f1f1elemf1f10
 						}
-						if f21f1f1iter.InstanceRequirements.ExcludedInstanceTypes != nil {
-							f21f1f1elemf1.ExcludedInstanceTypes = aws.ToStringSlice(f21f1f1iter.InstanceRequirements.ExcludedInstanceTypes)
+						if f20f1f1iter.InstanceRequirements.ExcludedInstanceTypes != nil {
+							f20f1f1elemf1.ExcludedInstanceTypes = aws.ToStringSlice(f20f1f1iter.InstanceRequirements.ExcludedInstanceTypes)
 						}
-						if f21f1f1iter.InstanceRequirements.InstanceGenerations != nil {
-							f21f1f1elemf1f12 := []svcsdktypes.InstanceGeneration{}
-							for _, f21f1f1elemf1f12iter := range f21f1f1iter.InstanceRequirements.InstanceGenerations {
-								var f21f1f1elemf1f12elem string
-								f21f1f1elemf1f12elem = string(*f21f1f1elemf1f12iter)
-								f21f1f1elemf1f12 = append(f21f1f1elemf1f12, svcsdktypes.InstanceGeneration(f21f1f1elemf1f12elem))
+						if f20f1f1iter.InstanceRequirements.InstanceGenerations != nil {
+							f20f1f1elemf1f12 := []svcsdktypes.InstanceGeneration{}
+							for _, f20f1f1elemf1f12iter := range f20f1f1iter.InstanceRequirements.InstanceGenerations {
+								var f20f1f1elemf1f12elem string
+								f20f1f1elemf1f12elem = string(*f20f1f1elemf1f12iter)
+								f20f1f1elemf1f12 = append(f20f1f1elemf1f12, svcsdktypes.InstanceGeneration(f20f1f1elemf1f12elem))
 							}
-							f21f1f1elemf1.InstanceGenerations = f21f1f1elemf1f12
+							f20f1f1elemf1.InstanceGenerations = f20f1f1elemf1f12
 						}
-						if f21f1f1iter.InstanceRequirements.LocalStorage != nil {
-							f21f1f1elemf1.LocalStorage = svcsdktypes.LocalStorage(*f21f1f1iter.InstanceRequirements.LocalStorage)
+						if f20f1f1iter.InstanceRequirements.LocalStorage != nil {
+							f20f1f1elemf1.LocalStorage = svcsdktypes.LocalStorage(*f20f1f1iter.InstanceRequirements.LocalStorage)
 						}
-						if f21f1f1iter.InstanceRequirements.LocalStorageTypes != nil {
-							f21f1f1elemf1f14 := []svcsdktypes.LocalStorageType{}
-							for _, f21f1f1elemf1f14iter := range f21f1f1iter.InstanceRequirements.LocalStorageTypes {
-								var f21f1f1elemf1f14elem string
-								f21f1f1elemf1f14elem = string(*f21f1f1elemf1f14iter)
-								f21f1f1elemf1f14 = append(f21f1f1elemf1f14, svcsdktypes.LocalStorageType(f21f1f1elemf1f14elem))
+						if f20f1f1iter.InstanceRequirements.LocalStorageTypes != nil {
+							f20f1f1elemf1f14 := []svcsdktypes.LocalStorageType{}
+							for _, f20f1f1elemf1f14iter := range f20f1f1iter.InstanceRequirements.LocalStorageTypes {
+								var f20f1f1elemf1f14elem string
+								f20f1f1elemf1f14elem = string(*f20f1f1elemf1f14iter)
+								f20f1f1elemf1f14 = append(f20f1f1elemf1f14, svcsdktypes.LocalStorageType(f20f1f1elemf1f14elem))
 							}
-							f21f1f1elemf1.LocalStorageTypes = f21f1f1elemf1f14
+							f20f1f1elemf1.LocalStorageTypes = f20f1f1elemf1f14
 						}
-						if f21f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice != nil {
-							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 := *f21f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice
+						if f20f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice != nil {
+							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 := *f20f1f1iter.InstanceRequirements.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice
 							if maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 > math.MaxInt32 || maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field MaxSpotPriceAsPercentageOfOptimalOnDemandPrice is of type int32")
 							}
 							maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy := int32(maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy0)
-							f21f1f1elemf1.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice = &maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy
+							f20f1f1elemf1.MaxSpotPriceAsPercentageOfOptimalOnDemandPrice = &maxSpotPriceAsPercentageOfOptimalOnDemandPriceCopy
 						}
-						if f21f1f1iter.InstanceRequirements.MemoryGiBPerVCPU != nil {
-							f21f1f1elemf1f16 := &svcsdktypes.MemoryGiBPerVCpuRequest{}
-							if f21f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max != nil {
-								f21f1f1elemf1f16.Max = f21f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max
+						if f20f1f1iter.InstanceRequirements.MemoryGiBPerVCPU != nil {
+							f20f1f1elemf1f16 := &svcsdktypes.MemoryGiBPerVCpuRequest{}
+							if f20f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max != nil {
+								f20f1f1elemf1f16.Max = f20f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Max
 							}
-							if f21f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min != nil {
-								f21f1f1elemf1f16.Min = f21f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min
+							if f20f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min != nil {
+								f20f1f1elemf1f16.Min = f20f1f1iter.InstanceRequirements.MemoryGiBPerVCPU.Min
 							}
-							f21f1f1elemf1.MemoryGiBPerVCpu = f21f1f1elemf1f16
+							f20f1f1elemf1.MemoryGiBPerVCpu = f20f1f1elemf1f16
 						}
-						if f21f1f1iter.InstanceRequirements.MemoryMiB != nil {
-							f21f1f1elemf1f17 := &svcsdktypes.MemoryMiBRequest{}
-							if f21f1f1iter.InstanceRequirements.MemoryMiB.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.MemoryMiB.Max
+						if f20f1f1iter.InstanceRequirements.MemoryMiB != nil {
+							f20f1f1elemf1f17 := &svcsdktypes.MemoryMiBRequest{}
+							if f20f1f1iter.InstanceRequirements.MemoryMiB.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.MemoryMiB.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f17.Max = &maxCopy
+								f20f1f1elemf1f17.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.MemoryMiB.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.MemoryMiB.Min
+							if f20f1f1iter.InstanceRequirements.MemoryMiB.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.MemoryMiB.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f17.Min = &minCopy
+								f20f1f1elemf1f17.Min = &minCopy
 							}
-							f21f1f1elemf1.MemoryMiB = f21f1f1elemf1f17
+							f20f1f1elemf1.MemoryMiB = f20f1f1elemf1f17
 						}
-						if f21f1f1iter.InstanceRequirements.NetworkBandwidthGbps != nil {
-							f21f1f1elemf1f18 := &svcsdktypes.NetworkBandwidthGbpsRequest{}
-							if f21f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max != nil {
-								f21f1f1elemf1f18.Max = f21f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max
+						if f20f1f1iter.InstanceRequirements.NetworkBandwidthGbps != nil {
+							f20f1f1elemf1f18 := &svcsdktypes.NetworkBandwidthGbpsRequest{}
+							if f20f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max != nil {
+								f20f1f1elemf1f18.Max = f20f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Max
 							}
-							if f21f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min != nil {
-								f21f1f1elemf1f18.Min = f21f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min
+							if f20f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min != nil {
+								f20f1f1elemf1f18.Min = f20f1f1iter.InstanceRequirements.NetworkBandwidthGbps.Min
 							}
-							f21f1f1elemf1.NetworkBandwidthGbps = f21f1f1elemf1f18
+							f20f1f1elemf1.NetworkBandwidthGbps = f20f1f1elemf1f18
 						}
-						if f21f1f1iter.InstanceRequirements.NetworkInterfaceCount != nil {
-							f21f1f1elemf1f19 := &svcsdktypes.NetworkInterfaceCountRequest{}
-							if f21f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max
+						if f20f1f1iter.InstanceRequirements.NetworkInterfaceCount != nil {
+							f20f1f1elemf1f19 := &svcsdktypes.NetworkInterfaceCountRequest{}
+							if f20f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.NetworkInterfaceCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f19.Max = &maxCopy
+								f20f1f1elemf1f19.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min
+							if f20f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.NetworkInterfaceCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f19.Min = &minCopy
+								f20f1f1elemf1f19.Min = &minCopy
 							}
-							f21f1f1elemf1.NetworkInterfaceCount = f21f1f1elemf1f19
+							f20f1f1elemf1.NetworkInterfaceCount = f20f1f1elemf1f19
 						}
-						if f21f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice != nil {
-							onDemandMaxPricePercentageOverLowestPriceCopy0 := *f21f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice
+						if f20f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice != nil {
+							onDemandMaxPricePercentageOverLowestPriceCopy0 := *f20f1f1iter.InstanceRequirements.OnDemandMaxPricePercentageOverLowestPrice
 							if onDemandMaxPricePercentageOverLowestPriceCopy0 > math.MaxInt32 || onDemandMaxPricePercentageOverLowestPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field OnDemandMaxPricePercentageOverLowestPrice is of type int32")
 							}
 							onDemandMaxPricePercentageOverLowestPriceCopy := int32(onDemandMaxPricePercentageOverLowestPriceCopy0)
-							f21f1f1elemf1.OnDemandMaxPricePercentageOverLowestPrice = &onDemandMaxPricePercentageOverLowestPriceCopy
+							f20f1f1elemf1.OnDemandMaxPricePercentageOverLowestPrice = &onDemandMaxPricePercentageOverLowestPriceCopy
 						}
-						if f21f1f1iter.InstanceRequirements.RequireHibernateSupport != nil {
-							f21f1f1elemf1.RequireHibernateSupport = f21f1f1iter.InstanceRequirements.RequireHibernateSupport
+						if f20f1f1iter.InstanceRequirements.RequireHibernateSupport != nil {
+							f20f1f1elemf1.RequireHibernateSupport = f20f1f1iter.InstanceRequirements.RequireHibernateSupport
 						}
-						if f21f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice != nil {
-							spotMaxPricePercentageOverLowestPriceCopy0 := *f21f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice
+						if f20f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice != nil {
+							spotMaxPricePercentageOverLowestPriceCopy0 := *f20f1f1iter.InstanceRequirements.SpotMaxPricePercentageOverLowestPrice
 							if spotMaxPricePercentageOverLowestPriceCopy0 > math.MaxInt32 || spotMaxPricePercentageOverLowestPriceCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field SpotMaxPricePercentageOverLowestPrice is of type int32")
 							}
 							spotMaxPricePercentageOverLowestPriceCopy := int32(spotMaxPricePercentageOverLowestPriceCopy0)
-							f21f1f1elemf1.SpotMaxPricePercentageOverLowestPrice = &spotMaxPricePercentageOverLowestPriceCopy
+							f20f1f1elemf1.SpotMaxPricePercentageOverLowestPrice = &spotMaxPricePercentageOverLowestPriceCopy
 						}
-						if f21f1f1iter.InstanceRequirements.TotalLocalStorageGB != nil {
-							f21f1f1elemf1f23 := &svcsdktypes.TotalLocalStorageGBRequest{}
-							if f21f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max != nil {
-								f21f1f1elemf1f23.Max = f21f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max
+						if f20f1f1iter.InstanceRequirements.TotalLocalStorageGB != nil {
+							f20f1f1elemf1f23 := &svcsdktypes.TotalLocalStorageGBRequest{}
+							if f20f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max != nil {
+								f20f1f1elemf1f23.Max = f20f1f1iter.InstanceRequirements.TotalLocalStorageGB.Max
 							}
-							if f21f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min != nil {
-								f21f1f1elemf1f23.Min = f21f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min
+							if f20f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min != nil {
+								f20f1f1elemf1f23.Min = f20f1f1iter.InstanceRequirements.TotalLocalStorageGB.Min
 							}
-							f21f1f1elemf1.TotalLocalStorageGB = f21f1f1elemf1f23
+							f20f1f1elemf1.TotalLocalStorageGB = f20f1f1elemf1f23
 						}
-						if f21f1f1iter.InstanceRequirements.VCPUCount != nil {
-							f21f1f1elemf1f24 := &svcsdktypes.VCpuCountRequest{}
-							if f21f1f1iter.InstanceRequirements.VCPUCount.Max != nil {
-								maxCopy0 := *f21f1f1iter.InstanceRequirements.VCPUCount.Max
+						if f20f1f1iter.InstanceRequirements.VCPUCount != nil {
+							f20f1f1elemf1f24 := &svcsdktypes.VCpuCountRequest{}
+							if f20f1f1iter.InstanceRequirements.VCPUCount.Max != nil {
+								maxCopy0 := *f20f1f1iter.InstanceRequirements.VCPUCount.Max
 								if maxCopy0 > math.MaxInt32 || maxCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Max is of type int32")
 								}
 								maxCopy := int32(maxCopy0)
-								f21f1f1elemf1f24.Max = &maxCopy
+								f20f1f1elemf1f24.Max = &maxCopy
 							}
-							if f21f1f1iter.InstanceRequirements.VCPUCount.Min != nil {
-								minCopy0 := *f21f1f1iter.InstanceRequirements.VCPUCount.Min
+							if f20f1f1iter.InstanceRequirements.VCPUCount.Min != nil {
+								minCopy0 := *f20f1f1iter.InstanceRequirements.VCPUCount.Min
 								if minCopy0 > math.MaxInt32 || minCopy0 < math.MinInt32 {
 									return nil, fmt.Errorf("error: field Min is of type int32")
 								}
 								minCopy := int32(minCopy0)
-								f21f1f1elemf1f24.Min = &minCopy
+								f20f1f1elemf1f24.Min = &minCopy
 							}
-							f21f1f1elemf1.VCpuCount = f21f1f1elemf1f24
+							f20f1f1elemf1.VCpuCount = f20f1f1elemf1f24
 						}
-						f21f1f1elem.InstanceRequirements = f21f1f1elemf1
+						f20f1f1elem.InstanceRequirements = f20f1f1elemf1
 					}
-					if f21f1f1iter.InstanceType != nil {
-						f21f1f1elem.InstanceType = f21f1f1iter.InstanceType
+					if f20f1f1iter.InstanceType != nil {
+						f20f1f1elem.InstanceType = f20f1f1iter.InstanceType
 					}
-					if f21f1f1iter.LaunchTemplateSpecification != nil {
-						f21f1f1elemf3 := &svcsdktypes.LaunchTemplateSpecification{}
-						if f21f1f1iter.LaunchTemplateSpecification.LaunchTemplateName != nil {
-							f21f1f1elemf3.LaunchTemplateName = f21f1f1iter.LaunchTemplateSpecification.LaunchTemplateName
+					if f20f1f1iter.LaunchTemplateSpecification != nil {
+						f20f1f1elemf3 := &svcsdktypes.LaunchTemplateSpecification{}
+						if f20f1f1iter.LaunchTemplateSpecification.LaunchTemplateName != nil {
+							f20f1f1elemf3.LaunchTemplateName = f20f1f1iter.LaunchTemplateSpecification.LaunchTemplateName
 						}
-						if f21f1f1iter.LaunchTemplateSpecification.Version != nil {
-							f21f1f1elemf3.Version = f21f1f1iter.LaunchTemplateSpecification.Version
+						if f20f1f1iter.LaunchTemplateSpecification.Version != nil {
+							f20f1f1elemf3.Version = f20f1f1iter.LaunchTemplateSpecification.Version
 						}
-						f21f1f1elem.LaunchTemplateSpecification = f21f1f1elemf3
+						f20f1f1elem.LaunchTemplateSpecification = f20f1f1elemf3
 					}
-					if f21f1f1iter.WeightedCapacity != nil {
-						f21f1f1elem.WeightedCapacity = f21f1f1iter.WeightedCapacity
+					if f20f1f1iter.WeightedCapacity != nil {
+						f20f1f1elem.WeightedCapacity = f20f1f1iter.WeightedCapacity
 					}
-					f21f1f1 = append(f21f1f1, *f21f1f1elem)
+					f20f1f1 = append(f20f1f1, *f20f1f1elem)
 				}
-				f21f1.Overrides = f21f1f1
+				f20f1.Overrides = f20f1f1
 			}
-			f21.LaunchTemplate = f21f1
+			f20.LaunchTemplate = f20f1
 		}
-		res.MixedInstancesPolicy = f21
+		res.MixedInstancesPolicy = f20
 	}
 	if r.ko.Spec.NewInstancesProtectedFromScaleIn != nil {
 		res.NewInstancesProtectedFromScaleIn = r.ko.Spec.NewInstancesProtectedFromScaleIn
