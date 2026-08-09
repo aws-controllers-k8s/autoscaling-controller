@@ -128,8 +128,10 @@ type CapacityReservationSpecification struct {
 // The target for the Capacity Reservation. Specify Capacity Reservations IDs
 // or Capacity Reservation resource group ARNs.
 type CapacityReservationTarget struct {
-	CapacityReservationIDs               []*string `json:"capacityReservationIDs,omitempty"`
-	CapacityReservationResourceGroupARNs []*string `json:"capacityReservationResourceGroupARNs,omitempty"`
+	CapacityReservationIDs []*string `json:"capacityReservationIDs,omitempty"`
+	// Reference field for CapacityReservationIDs
+	CapacityReservationRefs              []*ackv1alpha1.AWSResourceReferenceWrapper `json:"capacityReservationRefs,omitempty"`
+	CapacityReservationResourceGroupARNs []*string                                  `json:"capacityReservationResourceGroupARNs,omitempty"`
 }
 
 // Describes the desired configuration for an instance refresh.

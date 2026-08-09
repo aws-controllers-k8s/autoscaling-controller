@@ -29,9 +29,23 @@ resources:
       AvailabilityZones:
         late_initialize:
           skip_incomplete_check: {}
+      # set: ignore keeps the Create/Update response from writing this struct
+      # back over the capacityReservationRefs companions below; the existing
+      # late_initialize then remains responsible for absorbing the AWS default,
+      # which the write-back had previously been doing incidentally.
       CapacityReservationSpecification:
         late_initialize:
           skip_incomplete_check: {}
+        set:
+          - method: Create
+            ignore: true
+          - method: Update
+            ignore: true
+      CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs:
+        references:
+          resource: CapacityReservation
+          service_name: ec2
+          path: Status.CapacityReservationID
       InstanceLifecyclePolicy:
         late_initialize:
           skip_incomplete_check: {}
@@ -99,20 +113,32 @@ resources:
           resource: Role
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
-      # TODO: Enable LaunchTemplate references once known issue with code generator is fixed
-      # bug is discussed in PR https://github.com/aws-controllers-k8s/autoscaling-controller/pull/3
-      # # Cross-resource reference to EC2 LaunchTemplate
-      # LaunchTemplate.LaunchTemplateID:
-      #   references:
-      #     resource: LaunchTemplate
-      #     service_name: ec2
-      #     path: Status.ID
-      # # Cross-resource reference for MixedInstancesPolicy LaunchTemplate
-      # MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification.LaunchTemplateID:
-      #   references:
-      #     resource: LaunchTemplate
-      #     service_name: ec2
-      #     path: Status.ID
+      # TODO: Enable LaunchTemplate references. The original blocker in
+      # https://github.com/aws-controllers-k8s/autoscaling-controller/pull/3 - the
+      # code-generator emitting the *Ref companions into Status as well as Spec -
+      # is FIXED as of code-generator v0.62.0; verified by generating
+      # LaunchTemplate.LaunchTemplateName locally and finding no *Ref anywhere in
+      # the CRD status. A different blocker remains.
+      #
+      # LaunchTemplateSpecification is a shared Go struct, used at all three of:
+      #   launchTemplate
+      #   mixedInstancesPolicy.launchTemplate.launchTemplateSpecification
+      #   mixedInstancesPolicy.launchTemplate.overrides[].launchTemplateSpecification
+      # so configuring a reference on any one path adds launchTemplateRef to the
+      # struct and therefore to all three positions in the CRD - while only the
+      # configured paths get a resolveReferenceFor* function. The third path
+      # would expose a launchTemplateRef that is silently never resolved and
+      # never validated.
+      #
+      # Wiring all three fixes that but then hits the delta: overrides is a list,
+      # so the generated comparison is a whole-list DeepEqual (see delta.go),
+      # which sees the *Ref members that sdkFind cannot reconstruct from
+      # DescribeAutoScalingGroups and diffs on every reconcile. Closing the group
+      # therefore needs all three references plus *Ref normalization in the
+      # existing delta_pre_compare hook, and live validation - not a
+      # generator.yaml-only change. Note the ID form cannot be used either: it is
+      # in ignore.field_paths below, and the Describe response echoes the
+      # template name, so the target path is ec2 LaunchTemplate's Spec.Name.
       # Cross-resource reference to ELBv2 TargetGroups
       TargetGroupARNs:
         references:

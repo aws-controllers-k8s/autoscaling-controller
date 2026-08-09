@@ -45,6 +45,8 @@ rules:
 - apiGroups:
   - ec2.services.k8s.aws
   resources:
+  - capacityreservations
+  - capacityreservations/status
   - instances
   - instances/status
   verbs:

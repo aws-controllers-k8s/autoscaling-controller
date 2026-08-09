@@ -726,6 +726,17 @@ func (in *CapacityReservationTarget) DeepCopyInto(out *CapacityReservationTarget
 			}
 		}
 	}
+	if in.CapacityReservationRefs != nil {
+		in, out := &in.CapacityReservationRefs, &out.CapacityReservationRefs
+		*out = make([]*corev1alpha1.AWSResourceReferenceWrapper, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	if in.CapacityReservationResourceGroupARNs != nil {
 		in, out := &in.CapacityReservationResourceGroupARNs, &out.CapacityReservationResourceGroupARNs
 		*out = make([]*string, len(*in))
