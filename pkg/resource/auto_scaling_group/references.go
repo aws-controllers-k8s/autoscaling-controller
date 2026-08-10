@@ -34,6 +34,9 @@ import (
 	svcapitypes "github.com/aws-controllers-k8s/autoscaling-controller/apis/v1alpha1"
 )
 
+// +kubebuilder:rbac:groups=ec2.services.k8s.aws,resources=capacityreservations,verbs=get;list
+// +kubebuilder:rbac:groups=ec2.services.k8s.aws,resources=capacityreservations/status,verbs=get;list
+
 // +kubebuilder:rbac:groups=ec2.services.k8s.aws,resources=instances,verbs=get;list
 // +kubebuilder:rbac:groups=ec2.services.k8s.aws,resources=instances/status,verbs=get;list
 
@@ -52,6 +55,14 @@ import (
 // values.
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
+
+	if ko.Spec.CapacityReservationSpecification != nil {
+		if ko.Spec.CapacityReservationSpecification.CapacityReservationTarget != nil {
+			if len(ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs) > 0 {
+				ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs = nil
+			}
+		}
+	}
 
 	if ko.Spec.InstanceRef != nil {
 		ko.Spec.InstanceID = nil
@@ -90,6 +101,12 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForCapacityReservationSpecification_CapacityReservationTarget_CapacityReservationIDs(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForInstanceID(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
@@ -121,6 +138,14 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.AutoScalingGroup) error {
 
+	if ko.Spec.CapacityReservationSpecification != nil {
+		if ko.Spec.CapacityReservationSpecification.CapacityReservationTarget != nil {
+			if len(ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs) > 0 && len(ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs) > 0 {
+				return ackerr.ResourceReferenceAndIDNotSupportedFor("CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs", "CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs")
+			}
+		}
+	}
+
 	if ko.Spec.InstanceRef != nil && ko.Spec.InstanceID != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("InstanceID", "InstanceRef")
 	}
@@ -137,6 +162,106 @@ func validateReferenceFields(ko *svcapitypes.AutoScalingGroup) error {
 
 	if len(ko.Spec.TargetGroupRefs) > 0 && len(ko.Spec.TargetGroupARNs) > 0 {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("TargetGroupARNs", "TargetGroupRefs")
+	}
+	return nil
+}
+
+// resolveReferenceForCapacityReservationSpecification_CapacityReservationTarget_CapacityReservationIDs reads the resource referenced
+// from CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs field and sets the CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForCapacityReservationSpecification_CapacityReservationTarget_CapacityReservationIDs(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.AutoScalingGroup,
+) (hasReferences bool, err error) {
+	if ko.Spec.CapacityReservationSpecification != nil {
+		if ko.Spec.CapacityReservationSpecification.CapacityReservationTarget != nil {
+			for _, f0iter := range ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs {
+				if f0iter != nil && f0iter.From != nil {
+					hasReferences = true
+					arr := f0iter.From
+					if arr.Name == nil || *arr.Name == "" {
+						return hasReferences, fmt.Errorf("provided resource reference is nil or empty: CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationRefs")
+					}
+					namespace, err := ackrt.ResolveCrossNamespaceReference(
+						ctx,
+						rm.cfg.EnableCrossNamespace,
+						&ko.Status.Conditions,
+						ackrt.CrossNamespaceRefKindResource,
+						ko.ObjectMeta.GetNamespace(),
+						arr.Namespace,
+						*arr.Name,
+					)
+					if err != nil {
+						return hasReferences, err
+					}
+					obj := &ec2apitypes.CapacityReservation{}
+					if err := getReferencedResourceState_CapacityReservation(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+						return hasReferences, err
+					}
+					if ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs == nil {
+						ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs = make([]*string, 0, 1)
+					}
+					ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs = append(ko.Spec.CapacityReservationSpecification.CapacityReservationTarget.CapacityReservationIDs, (*string)(obj.Status.CapacityReservationID))
+				}
+			}
+		}
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_CapacityReservation looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_CapacityReservation(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *ec2apitypes.CapacityReservation,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"CapacityReservation",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"CapacityReservation",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"CapacityReservation",
+			namespace, name)
+	}
+	if obj.Status.CapacityReservationID == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"CapacityReservation",
+			namespace, name,
+			"Status.CapacityReservationID")
 	}
 	return nil
 }
