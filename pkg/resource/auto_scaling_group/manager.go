@@ -50,7 +50,7 @@ var (
 // +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups/status,verbs=get;update;patch
 
-var lateInitializeFieldNames = []string{"AvailabilityZoneDistribution", "AvailabilityZones", "CapacityReservationSpecification", "InstanceLifecyclePolicy", "NewInstancesProtectedFromScaleIn", "ServiceLinkedRoleARN", "TerminationPolicies"}
+var lateInitializeFieldNames = []string{"AvailabilityZoneDistribution", "AvailabilityZones", "CapacityReservationSpecification", "DefaultCooldown", "HealthCheckGracePeriod", "HealthCheckType", "InstanceLifecyclePolicy", "NewInstancesProtectedFromScaleIn", "ServiceLinkedRoleARN", "TerminationPolicies"}
 
 // resourceManager is responsible for providing a consistent way to perform
 // CRUD operations in a backend AWS service API for Book custom resources.
@@ -270,6 +270,15 @@ func (rm *resourceManager) lateInitializeFromReadOneOutput(
 	}
 	if observedKo.Spec.CapacityReservationSpecification != nil && latestKo.Spec.CapacityReservationSpecification == nil {
 		latestKo.Spec.CapacityReservationSpecification = observedKo.Spec.CapacityReservationSpecification
+	}
+	if observedKo.Spec.DefaultCooldown != nil && latestKo.Spec.DefaultCooldown == nil {
+		latestKo.Spec.DefaultCooldown = observedKo.Spec.DefaultCooldown
+	}
+	if observedKo.Spec.HealthCheckGracePeriod != nil && latestKo.Spec.HealthCheckGracePeriod == nil {
+		latestKo.Spec.HealthCheckGracePeriod = observedKo.Spec.HealthCheckGracePeriod
+	}
+	if observedKo.Spec.HealthCheckType != nil && latestKo.Spec.HealthCheckType == nil {
+		latestKo.Spec.HealthCheckType = observedKo.Spec.HealthCheckType
 	}
 	if observedKo.Spec.InstanceLifecyclePolicy != nil && latestKo.Spec.InstanceLifecyclePolicy == nil {
 		latestKo.Spec.InstanceLifecyclePolicy = observedKo.Spec.InstanceLifecyclePolicy
