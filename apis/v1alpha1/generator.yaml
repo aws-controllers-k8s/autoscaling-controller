@@ -55,6 +55,15 @@ resources:
       TerminationPolicies:
         late_initialize:
           skip_incomplete_check: {}
+      DefaultCooldown:
+        late_initialize:
+          skip_incomplete_check: {}
+      HealthCheckGracePeriod:
+        late_initialize:
+          skip_incomplete_check: {}
+      HealthCheckType:
+        late_initialize:
+          skip_incomplete_check: {}
       CreatedTime:
         is_read_only: true
         from:
