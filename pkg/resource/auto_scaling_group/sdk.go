@@ -768,9 +768,15 @@ func (rm *resourceManager) sdkCreate(
 			}
 		}
 	}()
-	if ko.Spec.Tags != nil {
+	if len(ko.Spec.EnabledMetricNames) > 0 {
+		if err = rm.syncMetricsCollection(ctx, ko.Spec.Name, ko.Spec.EnabledMetricNames, nil, "CREATE"); err != nil {
+			return nil, err
+		}
+	}
+	if ko.Spec.Tags != nil || ko.Spec.EnabledMetricNames != nil {
 		ackcondition.SetSynced(&resource{ko}, corev1.ConditionFalse, nil, nil)
 	}
+
 	return &resource{ko}, nil
 }
 
@@ -1388,7 +1394,7 @@ func (rm *resourceManager) sdkUpdate(
 	defer func() {
 		exit(err)
 	}()
-	updatedDesired := desired.DeepCopy()
+	updatedDesired := rm.concreteResource(desired.DeepCopy())
 	updatedDesired.SetStatus(latest)
 	if delta.DifferentAt("Spec.Tags") {
 		name := string(*latest.ko.Spec.Name)
@@ -1401,9 +1407,28 @@ func (rm *resourceManager) sdkUpdate(
 			return nil, err
 		}
 	}
-	if !delta.DifferentExcept("Spec.Tags") {
-		return rm.concreteResource(updatedDesired), nil
+	if delta.DifferentAt(enabledMetricsDeltaPath) {
+		if err = rm.syncMetricsCollection(
+			ctx, latest.ko.Spec.Name, desired.ko.Spec.EnabledMetricNames, latest.ko.Status.EnabledMetrics, "UPDATE",
+		); err != nil {
+			return nil, err
+		}
+		observed, readErr := rm.sdkFind(ctx, desired)
+		if readErr != nil {
+			return nil, readErr
+		}
+		desired.ko.Status.EnabledMetrics = observed.ko.Status.EnabledMetrics
+		updatedDesired.ko.Status.EnabledMetrics = observed.ko.Status.EnabledMetrics
+		if !requestedMetricNames(desired.ko.Spec.EnabledMetricNames).Equal(enabledMetricNames(observed.ko.Status.EnabledMetrics)) {
+			return updatedDesired, ackrequeue.NeededAfter(
+				ackerr.TemporaryOutOfSync, ackrequeue.DefaultRequeueAfterDuration,
+			)
+		}
 	}
+	if !delta.DifferentExcept("Spec.Tags", enabledMetricsDeltaPath) {
+		return updatedDesired, nil
+	}
+
 	input, err := rm.newUpdateRequestPayload(ctx, desired, delta)
 	if err != nil {
 		return nil, err

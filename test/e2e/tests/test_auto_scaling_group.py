@@ -154,6 +154,45 @@ class TestAutoScalingGroup:
         # Confirm the resource is still synced
         assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=1)
 
+    def test_enabled_metrics(self, autoscaling_client, simple_auto_scaling_group):
+        ref, cr = simple_auto_scaling_group
+        asg_name = cr["spec"]["name"]
+
+        def assert_enabled_metrics(expected):
+            # Wait for current status after the patch, since ResourceSynced may
+            # still be True from the previous generation.
+            expected_metrics = {(name, "1Minute") for name in expected}
+            for _ in range(30):
+                resource = k8s.get_resource(ref)
+                status = resource.get("status", {})
+                observed = {
+                    (metric["metric"], metric["granularity"])
+                    for metric in status.get("enabledMetrics", [])
+                }
+                if observed == expected_metrics:
+                    break
+                time.sleep(2)
+            assert observed == expected_metrics
+            assert set(resource["spec"]["enabledMetrics"]) == set(expected)
+            assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=3)
+
+            response = autoscaling_client.describe_auto_scaling_groups(
+                AutoScalingGroupNames=[asg_name]
+            )
+            assert {
+                (metric["Metric"], metric["Granularity"])
+                for metric in response["AutoScalingGroups"][0].get("EnabledMetrics", [])
+            } == expected_metrics
+
+        assert_enabled_metrics(["GroupDesiredCapacity", "GroupInServiceInstances"])
+
+        updated_metrics = ["GroupDesiredCapacity", "GroupTotalInstances"]
+        k8s.patch_custom_resource(ref, {"spec": {"enabledMetrics": updated_metrics}})
+        assert_enabled_metrics(updated_metrics)
+
+        k8s.patch_custom_resource(ref, {"spec": {"enabledMetrics": []}})
+        assert_enabled_metrics([])
+
     def test_create_with_tags(self, autoscaling_client, auto_scaling_group_with_tags):
         """Test that tags specified at creation time are correctly applied to the ASG."""
         (ref, cr) = auto_scaling_group_with_tags

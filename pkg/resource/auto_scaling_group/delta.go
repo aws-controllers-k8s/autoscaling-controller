@@ -23,6 +23,7 @@ import (
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
 	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 // Hack to avoid import errors during build...
@@ -57,6 +58,15 @@ func newResourceDelta(
 		sort.Strings(subnetsB)
 		sortedB := strings.Join(subnetsB, ",")
 		b.ko.Spec.VPCZoneIdentifier = &sortedB
+	}
+
+	// Leave existing collection alone unless the user specifies a metric list.
+	if a.ko.Spec.EnabledMetricNames != nil {
+		requested := requestedMetricNames(a.ko.Spec.EnabledMetricNames)
+		enabled := enabledMetricNames(b.ko.Status.EnabledMetrics)
+		if !requested.Equal(enabled) {
+			delta.Add(enabledMetricsDeltaPath, sets.List(requested), sets.List(enabled))
+		}
 	}
 
 	if ackcompare.HasNilDifference(a.ko.Spec.AvailabilityZoneDistribution, b.ko.Spec.AvailabilityZoneDistribution) {

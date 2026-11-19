@@ -285,6 +285,17 @@ func (in *AutoScalingGroupSpec) DeepCopyInto(out *AutoScalingGroupSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EnabledMetricNames != nil {
+		in, out := &in.EnabledMetricNames, &out.EnabledMetricNames
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
+	}
 	if in.HealthCheckGracePeriod != nil {
 		in, out := &in.HealthCheckGracePeriod, &out.HealthCheckGracePeriod
 		*out = new(int64)

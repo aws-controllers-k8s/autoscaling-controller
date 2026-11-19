@@ -93,6 +93,11 @@ type AutoScalingGroupSpec struct {
 	//
 	// Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
 	DesiredCapacityType *string `json:"desiredCapacityType,omitempty"`
+	// The Auto Scaling group metrics to publish to CloudWatch at one-minute
+	// granularity. Omit this field to leave collection settings unchanged.
+	// Set it to an empty list to disable all group metrics.
+	// +optional
+	EnabledMetricNames []*string `json:"enabledMetrics,omitzero"`
 	// The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before
 	// checking the health status of an EC2 instance that has come into service
 	// and marking it unhealthy due to a failed health check. This is useful if

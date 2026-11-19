@@ -1,0 +1,9 @@
+resources:
+  AutoScalingGroup:
+    fields:
+      EnabledMetricNames:
+        override: |
+          The Auto Scaling group metrics to publish to CloudWatch at one-minute
+          granularity. Omit this field to leave collection settings unchanged.
+          Set it to an empty list to disable all group metrics.
+          +optional

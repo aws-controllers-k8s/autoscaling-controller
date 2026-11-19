@@ -13,3 +13,12 @@
 		sortedB := strings.Join(subnetsB, ",")
 		b.ko.Spec.VPCZoneIdentifier = &sortedB
 	}
+
+	// Leave existing collection alone unless the user specifies a metric list.
+	if a.ko.Spec.EnabledMetricNames != nil {
+		requested := requestedMetricNames(a.ko.Spec.EnabledMetricNames)
+		enabled := enabledMetricNames(b.ko.Status.EnabledMetrics)
+		if !requested.Equal(enabled) {
+			delta.Add(enabledMetricsDeltaPath, sets.List(requested), sets.List(enabled))
+		}
+	}

@@ -176,6 +176,14 @@ spec:
 
                   Regex Pattern: `^[\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF\r\n\t]*$`
                 type: string
+              enabledMetrics:
+                description: |-
+                  The Auto Scaling group metrics to publish to CloudWatch at one-minute
+                  granularity. Omit this field to leave collection settings unchanged.
+                  Set it to an empty list to disable all group metrics.
+                items:
+                  type: string
+                type: array
               healthCheckGracePeriod:
                 description: |-
                   The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before
