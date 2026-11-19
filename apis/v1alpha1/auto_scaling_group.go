@@ -96,6 +96,8 @@ type AutoScalingGroupSpec struct {
 	// The Auto Scaling group metrics to publish to CloudWatch at one-minute
 	// granularity. Omit this field to leave collection settings unchanged.
 	// Set it to an empty list to disable all group metrics.
+	// For supported metric names, see EnableMetricsCollection
+	// (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_EnableMetricsCollection.html).
 	// +optional
 	EnabledMetricNames []*string `json:"enabledMetrics,omitzero"`
 	// The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before
