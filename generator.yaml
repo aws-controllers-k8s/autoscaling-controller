@@ -77,6 +77,14 @@ resources:
         from:
           operation: DescribeAutoScalingGroups
           path: AutoScalingGroups.EnabledMetrics
+      # Use a distinct Go field name to preserve the existing Status field.
+      EnabledMetricNames:
+        from:
+          operation: EnableMetricsCollection
+          path: Metrics
+        go_tag: 'json:"enabledMetrics,omitzero"'
+        compare:
+          is_ignored: true # Compare the requested names to Status.EnabledMetrics as sets.
       SuspendedProcesses:
         is_read_only: true
         from:
